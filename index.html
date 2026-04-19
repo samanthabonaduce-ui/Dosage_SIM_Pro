@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DosageSIM Pro</title>
+    <title>Dosage SIM Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
@@ -36,20 +36,20 @@
         }
 
         #game-canvas-container {
-            background: #cbd5e1;
+            background: #0f172a;
             border-radius: 24px;
             padding: 12px;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: inset 0 2px 20px rgba(0,0,0,0.5);
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 4px solid #ffffff;
+            border: 4px solid #334155;
         }
 
         #game-canvas {
             background: #ffffff;
             border-radius: 4px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
         }
 
         .side-panel {
@@ -72,56 +72,74 @@
             top: 0;
             width: calc(100% - 420px);
             height: 100%;
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(15, 23, 42, 0.85);
             z-index: 100;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(8px);
         }
 
         .modal.active { display: flex; }
 
-        .cup-barrel { 
-            width: 150px; height: 200px; 
-            clip-path: polygon(10% 0%, 90% 0%, 75% 100%, 25% 100%);
-            background: #e2e8f0;
-            position: relative;
-            border: 3px solid #64748b;
-        }
-
-        .syringe-barrel { 
-            width: 320px; height: 70px; 
-            border-radius: 0 35px 35px 0; 
-            background: #f1f5f9;
-            position: relative;
-            border: 3px solid #64748b;
-        }
-
+        /* Calculator Refined */
         .calculator-body {
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 20px;
-            border: 2px solid #e2e8f0;
+            background: #e2e8f0;
+            padding: 12px;
+            border-radius: 24px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .calc-screen {
-            background: #0f172a;
-            color: #38bdf8;
+            background: #1e293b;
+            color: #10b981;
             font-family: 'JetBrains Mono', monospace;
-            padding: 10px;
+            padding: 12px;
             text-align: right;
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             border-radius: 12px;
-            margin-bottom: 10px;
-            height: 54px;
+            margin-bottom: 12px;
+            height: 64px;
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);
+            border: 2px solid #334155;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
         }
 
         .calc-btn {
-            @apply bg-white hover:bg-blue-50 text-slate-700 font-bold py-2 rounded-xl transition-all border border-slate-200 shadow-sm active:translate-y-0.5;
+            @apply bg-white hover:bg-slate-50 text-slate-800 font-bold py-3 rounded-xl transition-all border-b-4 border-slate-300 active:border-b-0 active:translate-y-1;
+        }
+
+        .calc-btn-op { @apply bg-blue-100 text-blue-700 border-blue-300; }
+        .calc-btn-clear { @apply bg-rose-100 text-rose-700 border-rose-300; }
+        .calc-btn-eq { @apply bg-blue-600 text-white border-blue-800 hover:bg-blue-700 row-span-2 flex items-center justify-center text-2xl; }
+
+        /* Equipment Visuals & Labels */
+        .equipment-label {
+            @apply absolute top-[-40px] left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2 rounded-lg font-black text-lg border-2 border-blue-500 shadow-xl;
+        }
+
+        .cup-barrel { 
+            width: 160px; height: 220px; 
+            clip-path: polygon(10% 0%, 90% 0%, 80% 100%, 20% 100%);
+            background: rgba(255,255,255,0.8);
+            position: relative;
+            border: 4px solid #94a3b8;
+        }
+
+        .syringe-barrel { 
+            width: 380px; height: 80px; 
+            border-radius: 0 40px 40px 0; 
+            background: rgba(255,255,255,0.8);
+            position: relative;
+            border: 4px solid #94a3b8;
         }
 
         .iv-pump-chassis {
@@ -129,7 +147,7 @@
             border: 6px solid #94a3b8;
             border-radius: 24px;
             padding: 24px;
-            width: 280px;
+            width: 300px;
         }
 
         .checklist-item {
@@ -143,17 +161,17 @@
 
     <header class="h-20 border-b-4 border-blue-600 flex items-center justify-between px-10 bg-white">
         <div class="flex items-center gap-4">
-            <div class="p-2.5 bg-rose-600 rounded-xl shadow-lg shadow-rose-200 animate-pulse">
+            <div class="p-2.5 bg-rose-600 rounded-xl shadow-lg shadow-rose-200">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
             </div>
             <div>
                 <h1 class="font-extrabold text-2xl tracking-tighter text-slate-900">DOSAGE<span class="text-blue-600">SIM</span>PRO</h1>
-                <p class="text-[10px] text-blue-500 font-black uppercase tracking-widest" id="status-text">Medication Math Maze</p>
+                <p class="text-[10px] text-blue-500 font-black uppercase tracking-widest" id="status-text">Clinical Competency Mode</p>
             </div>
         </div>
         <div class="flex gap-8">
             <div class="text-right">
-                <p class="text-[10px] text-slate-400 uppercase font-black">Current Unit</p>
+                <p class="text-[10px] text-slate-400 uppercase font-black">Floor Challenge</p>
                 <p class="text-xl font-black text-blue-600" id="level-display">FLOOR 1</p>
             </div>
         </div>
@@ -167,41 +185,51 @@
         <aside class="side-panel">
             <div class="calculator-body">
                 <div id="calc-display" class="calc-screen">0</div>
-                <div class="grid grid-cols-4 gap-2">
+                <div class="calc-grid">
+                    <!-- Row 1 -->
+                    <button onclick="calcClear()" class="calc-btn calc-btn-clear">AC</button>
+                    <button onclick="calcPress('/')" class="calc-btn calc-btn-op">÷</button>
+                    <button onclick="calcPress('*')" class="calc-btn calc-btn-op">×</button>
+                    <button onclick="calcPress('-')" class="calc-btn calc-btn-op">-</button>
+                    
+                    <!-- Row 2 -->
                     <button onclick="calcPress('7')" class="calc-btn">7</button>
                     <button onclick="calcPress('8')" class="calc-btn">8</button>
                     <button onclick="calcPress('9')" class="calc-btn">9</button>
-                    <button onclick="calcPress('/')" class="calc-btn bg-slate-100 text-blue-700">÷</button>
-                    <button onclick="calcPress('4')" class="calc-btn">4</button>
-                    <button onclick="calcPress('5')" class="calc-btn">5</button>
-                    <button onclick="calcPress('6')" class="calc-btn">6</button>
-                    <button onclick="calcPress('*')" class="calc-btn bg-slate-100 text-blue-700">×</button>
-                    <button onclick="calcPress('1')" class="calc-btn">1</button>
-                    <button onclick="calcPress('2')" class="calc-btn">2</button>
-                    <button onclick="calcPress('3')" class="calc-btn">3</button>
-                    <button onclick="calcPress('-')" class="calc-btn bg-slate-100 text-blue-700">-</button>
-                    <button onclick="calcPress('0')" class="calc-btn">0</button>
-                    <button onclick="calcPress('.')" class="calc-btn">.</button>
-                    <button onclick="calcEval()" class="calc-btn bg-blue-600 text-white hover:bg-blue-700">=</button>
-                    <button onclick="calcPress('+')" class="calc-btn bg-slate-100 text-blue-700">+</button>
-                    <button onclick="calcClear()" class="calc-btn bg-rose-50 text-rose-600 col-span-4 py-1 text-xs">CLEAR ENTRY</button>
+                    <button onclick="calcPress('+')" class="calc-btn calc-btn-op">+</button>
+                    
+                    <!-- Row 3 & 4 Layout -->
+                    <div class="col-span-3 grid grid-cols-3 gap-2">
+                        <button onclick="calcPress('4')" class="calc-btn">4</button>
+                        <button onclick="calcPress('5')" class="calc-btn">5</button>
+                        <button onclick="calcPress('6')" class="calc-btn">6</button>
+                        <button onclick="calcPress('1')" class="calc-btn">1</button>
+                        <button onclick="calcPress('2')" class="calc-btn">2</button>
+                        <button onclick="calcPress('3')" class="calc-btn">3</button>
+                        <button onclick="calcPress('0')" class="calc-btn col-span-2">0</button>
+                        <button onclick="calcPress('.')" class="calc-btn">.</button>
+                    </div>
+                    <button onclick="calcEval()" class="calc-btn calc-btn-eq">=</button>
                 </div>
             </div>
 
-            <div class="bg-blue-50 rounded-[24px] p-5 border-2 border-blue-100 shadow-sm">
+            <div class="bg-blue-50 rounded-[24px] p-5 border-2 border-blue-100">
                 <h3 class="text-[11px] font-black text-blue-700 uppercase tracking-widest mb-3 flex justify-between">
-                    <span>Shift Progress</span>
+                    <span>Shift Protocol Progress</span>
                     <span id="progress-count">0 / 6</span>
                 </h3>
                 <div id="checklist-container" class="space-y-0.5"></div>
             </div>
 
-            <div class="flex-1 bg-slate-900 rounded-[24px] p-5 text-white">
-                <h3 class="text-[11px] font-black text-blue-400 uppercase tracking-widest mb-3">Unit Report</h3>
-                <p id="unit-name" class="text-lg font-extrabold mb-2">Med-Surg Overflow</p>
-                <p class="text-[11px] text-slate-400 leading-relaxed italic">
-                    "Find the 6 verification stations needed to unlock the Med Room. Watch out for complex IV titrations on higher floors."
-                </p>
+            <div class="flex-1 bg-slate-900 rounded-[24px] p-6 text-white border-b-8 border-blue-600">
+                <h3 class="text-[11px] font-black text-blue-400 uppercase tracking-widest mb-3">Nurse's Report</h3>
+                <p id="unit-name" class="text-lg font-extrabold mb-1">High-Acuity Unit</p>
+                <p id="floor-specialty" class="text-[10px] text-emerald-400 font-bold mb-4 uppercase tracking-wider">Specialty: ADVANCED CALCS</p>
+                
+                <div class="space-y-3 text-[11px] leading-relaxed text-slate-300">
+                    <p class="border-l-2 border-blue-500 pl-3">The facility architecture is complex. Beware of deceptive corridors.</p>
+                    <p class="border-l-2 border-amber-500 pl-3">Yellow Rx gates appear identical. Only those on the <span class="text-white font-bold">critical path</span> satisfy protocol.</p>
+                </div>
             </div>
         </aside>
     </main>
@@ -210,42 +238,49 @@
     <div id="quiz-modal" class="modal">
         <div class="bg-white border-4 border-blue-600 p-8 rounded-[40px] shadow-2xl w-full max-w-sm">
             <div class="flex justify-between items-center mb-4">
-                <span id="q-category" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase tracking-tighter">PHARMACOLOGY</span>
-                <span id="q-id" class="text-slate-300 text-[10px] font-bold">#000</span>
+                <span id="q-category" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase tracking-tighter">VERIFICATION GATE</span>
+                <span id="q-id" class="text-slate-300 text-[10px] font-bold">#NCLEX</span>
             </div>
             <p id="q-text" class="text-slate-800 mb-8 text-base font-bold leading-snug"></p>
             <div class="relative mb-6">
-                <input type="number" step="0.01" id="q-input" class="w-full bg-slate-100 border-2 border-slate-300 rounded-2xl p-5 text-4xl font-mono text-center outline-none focus:border-blue-600 text-blue-600 transition-all" placeholder="0.0">
+                <input type="number" step="0.01" id="q-input" class="w-full bg-slate-100 border-2 border-slate-300 rounded-2xl p-5 text-4xl font-mono text-center outline-none focus:border-blue-600 text-blue-600" placeholder="0.0">
                 <div id="q-unit" class="text-center mt-2 text-[10px] font-black text-slate-400 uppercase">CALCULATED VALUE</div>
             </div>
-            <button onclick="submitDose()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl font-black shadow-xl transition-all uppercase tracking-widest text-lg">Validate Medication</button>
+            <button onclick="submitDose()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl font-black shadow-xl transition-all uppercase tracking-widest text-lg">Submit Calculation</button>
             <p id="q-feedback" class="text-center font-black mt-4 h-4 uppercase tracking-widest text-xs"></p>
         </div>
     </div>
 
     <!-- Case Finale Modal -->
     <div id="case-modal" class="modal">
-        <div class="bg-white border-4 border-emerald-500 w-full max-w-4xl p-12 rounded-[56px] shadow-2xl overflow-y-auto max-h-[90vh]">
+        <div class="bg-white border-4 border-emerald-500 w-full max-w-5xl p-12 rounded-[56px] shadow-2xl overflow-y-auto max-h-[90vh]">
             <div id="finale-step-1" class="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <div>
-                    <h2 class="text-3xl font-black text-slate-900 mb-6">Medication Room</h2>
+                    <h2 class="text-3xl font-black text-slate-900 mb-6 tracking-tight">Access Control: Final Dose</h2>
                     <div class="bg-blue-50 p-8 rounded-[32px] border-2 border-blue-100 mb-8">
-                        <p class="text-[11px] text-blue-500 font-black uppercase mb-3">Order for Patient #402</p>
+                        <p class="text-[11px] text-blue-500 font-black uppercase mb-3">Safety Verification</p>
                         <p class="text-lg text-slate-800 font-extrabold leading-tight" id="finale-math-q"></p>
                     </div>
-                    <div id="finale-inputs"></div>
-                    <button onclick="verifyFinaleAction()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-5 rounded-2xl font-black mt-8 shadow-xl transition-all uppercase tracking-widest text-lg">Confirm Administration</button>
+                    <div class="p-6 bg-slate-50 border-2 border-slate-200 rounded-2xl mb-4">
+                        <p class="text-[10px] font-black text-slate-400 uppercase mb-2">Instructions</p>
+                        <p class="text-xs text-slate-600 font-semibold italic">Click or drag on the equipment to the right to measure the precise dose. The label will update to show your current measurement.</p>
+                    </div>
+                    <button onclick="verifyFinaleAction()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-5 rounded-2xl font-black shadow-xl transition-all uppercase tracking-widest text-lg">Confirm Dose Selection</button>
                 </div>
-                <div id="equipment-visual-area" class="min-h-[400px] flex items-center justify-center bg-slate-100 rounded-[48px] border-4 border-white shadow-inner relative"></div>
+                <div class="min-h-[400px] flex items-center justify-center bg-slate-200 rounded-[48px] border-4 border-white shadow-inner relative" id="equipment-container">
+                    <div id="active-measure-label" class="equipment-label">0.0</div>
+                    <div id="equipment-visual-area"></div>
+                </div>
             </div>
             <div id="finale-step-2" class="hidden text-center">
-                <h2 class="text-4xl font-black text-slate-900 mb-8">Shift Handover</h2>
-                <div class="max-w-2xl mx-auto">
-                    <p id="nclex-q" class="text-xl text-slate-700 mb-10 font-bold leading-relaxed"></p>
+                <h2 class="text-4xl font-black text-slate-900 mb-4 tracking-tight">Clinical Judgment</h2>
+                <p class="text-slate-400 font-bold mb-10 text-[11px] uppercase tracking-[0.2em]">NCLEX Multiple Choice Verification</p>
+                <div class="max-w-3xl mx-auto">
+                    <p id="nclex-q" class="text-xl text-slate-700 mb-10 font-bold leading-relaxed bg-slate-50 p-8 rounded-3xl"></p>
                     <div id="nclex-options" class="grid gap-4"></div>
                     <div id="nclex-rationale" class="hidden mt-10 p-8 bg-emerald-50 rounded-[32px] border-2 border-emerald-100 text-left">
                         <p id="rationale-text" class="text-slate-800 text-base font-semibold"></p>
-                        <button id="finale-continue" class="mt-8 w-full bg-slate-900 py-5 rounded-2xl text-white font-black text-lg uppercase tracking-widest hover:bg-black">Continue to Next Floor</button>
+                        <button id="finale-continue" class="mt-8 w-full bg-slate-900 py-5 rounded-2xl text-white font-black text-lg uppercase tracking-widest hover:bg-black">Clock Out & Proceed</button>
                     </div>
                 </div>
             </div>
@@ -253,7 +288,6 @@
     </div>
 
     <script>
-        // Item Bank Logic - Generating 100+ variations per category
         const categories = {
             PO: { unit: 'tabs/mL', label: 'Oral' },
             SQ: { unit: 'mL', label: 'Subcutaneous' },
@@ -264,65 +298,82 @@
             IV_KG: { unit: 'mL/hr', label: 'Weight Based' }
         };
 
+        const FLOOR_CONFIG = {
+            1: { name: "Med-Surg Unit", cats: ['PO', 'SQ', 'IM'], specialty: "Basic Administration" },
+            2: { name: "Telemetry Unit", cats: ['IV_INJ'], specialty: "Cardiac / IV Bolus" },
+            3: { name: "Oncology Unit", cats: ['IV_RATE'], specialty: "Chemo / Constant Rate" },
+            4: { name: "Pediatric Floor", cats: ['IV_GTT'], specialty: "Micro-Drip Systems" },
+            5: { name: "Critical Care", cats: ['IV_KG'], specialty: "Vasoactive Titrations" }
+        };
+
+        const nclexQuestions = [
+            {
+                q: "A patient's blood pressure drops significantly after receiving an IV medication. Which nursing intervention is the most appropriate first response?",
+                options: [
+                    { t: "A. Elevate the head of the bed to 90 degrees.", c: false, r: "Elevating the head of the bed may further decrease cerebral perfusion in a hypotensive patient." },
+                    { t: "B. Increase the primary IV fluid rate if ordered.", c: true, r: "Increasing fluid volume helps stabilize blood pressure in cases of sudden hypotension." },
+                    { t: "C. Wait 10 minutes and re-check the blood pressure.", c: false, r: "Acute hypotension requires immediate action, not delayed assessment." },
+                    { t: "D. Call the hospital pharmacist to report the reaction.", c: false, r: "The patient must be stabilized and the provider notified before administrative reporting." }
+                ]
+            },
+            {
+                q: "When preparing to administer a medication, the nurse notes the patient is wearing a red allergy band but the MAR does not list any allergies. What is the priority?",
+                options: [
+                    { t: "A. Administer the medication and check with the patient afterward.", c: false, r: "Never administer medication if an allergy status is unclear." },
+                    { t: "B. Ask the patient's roommate if they know the patient's allergies.", c: false, r: "Roommates are not a reliable or HIPAA-compliant source for medical history." },
+                    { t: "C. Interview the patient and verify the allergy before administration.", c: true, r: "Direct patient verification is the safest primary action in this scenario." },
+                    { t: "D. Remove the red band if the MAR is empty.", c: false, r: "Removing a safety alert without verification is a serious error." }
+                ]
+            }
+        ];
+
         function generateItemBank() {
             const bank = [];
-            // PO (Oral)
-            for(let i=0; i<105; i++){
+            // PO/IM/SQ
+            for(let i=0; i<150; i++){
                 const dose = (Math.floor(Math.random()*10)+1)*50;
                 const supply = [25, 50, 100, 250, 500][Math.floor(Math.random()*5)];
                 bank.push({cat:'PO', q:`Order: Medication ${dose}mg PO. Supply: ${supply}mg tablets. Give how many tabs?`, a: dose/supply});
             }
-            // SQ
-            for(let i=0; i<105; i++){
-                const units = (Math.floor(Math.random()*10)+1)*500;
-                const conc = [5000, 10000][Math.floor(Math.random()*2)];
-                bank.push({cat:'SQ', q:`Order: Heparin ${units} units SQ. Supply: ${conc} units/mL. Give how many mL?`, a: units/conc});
-            }
-            // IV RATE
-            for(let i=0; i<105; i++){
-                const vol = [250, 500, 1000][Math.floor(Math.random()*3)];
-                const hr = [4, 6, 8, 10, 12, 24][Math.floor(Math.random()*6)];
-                bank.push({cat:'IV_RATE', q:`Order: ${vol}mL NS IV to infuse over ${hr} hours. Set the pump (mL/hr).`, a: Math.round(vol/hr)});
-            }
-            // IV GTT
-            for(let i=0; i<105; i++){
-                const vol = [100, 250, 500, 1000][Math.floor(Math.random()*4)];
-                const min = [30, 60, 120, 240, 480][Math.floor(Math.random()*5)];
-                const factor = [10, 15, 20, 60][Math.floor(Math.random()*4)];
-                bank.push({cat:'IV_GTT', q:`Order: ${vol}mL over ${min} minutes. Tubing factor: ${factor} gtt/mL. Flow rate (gtt/min)?`, a: Math.round((vol*factor)/min)});
-            }
-            // IV KG
-            for(let i=0; i<105; i++){
-                const kg = Math.floor(Math.random()*40)+40;
-                const mcg = [2, 5, 10, 15][Math.floor(Math.random()*4)];
-                const bag = 400; const bagVol = 250;
-                const a = (mcg * kg * 60) / ( (bag*1000)/bagVol );
-                bank.push({cat:'IV_KG', q:`Order: Dopamine ${mcg}mcg/kg/min. Patient: ${kg}kg. Supply: ${bag}mg in ${bagVol}mL. Set pump (mL/hr).`, a: parseFloat(a.toFixed(1))});
-            }
-            // IM
-            for(let i=0; i<105; i++){
-                const dose = (Math.floor(Math.random()*4)+1)*0.25;
-                const supply = 0.5;
-                bank.push({cat:'IM', q:`Order: Vitamin K ${dose}mg IM. Supply: ${supply}mg/mL. Give how many mL?`, a: dose/supply});
-            }
-            // IV INJ
-            for(let i=0; i<105; i++){
+            // IV Push
+            for(let i=0; i<100; i++){
                 const mg = (Math.floor(Math.random()*10)+2);
                 const supply = 10; const vol = 2;
-                bank.push({cat:'IV_INJ', q:`Order: Morphine ${mg}mg IV Push. Supply: ${supply}mg/${vol}mL. Give how many mL?`, a: (mg*vol)/supply});
+                bank.push({cat:'IV_INJ', q:`Order: Medication ${mg}mg via IV Push. Supply: ${supply}mg/${vol}mL. Volume to draw (mL)?`, a: (mg*vol)/supply});
+            }
+            // IV Rates
+            for(let i=0; i<100; i++){
+                const vol = [100, 250, 500][Math.floor(Math.random()*3)];
+                const min = [30, 45, 60, 90][Math.floor(Math.random()*4)];
+                bank.push({cat:'IV_RATE', q:`Order: ${vol}mL IVPB over ${min} minutes. Set pump rate (mL/hr).`, a: Math.round((vol/min)*60)});
+            }
+            // IV Drip
+            for(let i=0; i<100; i++){
+                const vol = 1000;
+                const hr = [8, 10, 12][Math.floor(Math.random()*3)];
+                const gttFactor = [10, 15, 20][Math.floor(Math.random()*3)];
+                bank.push({cat:'IV_GTT', q:`Order: ${vol}mL over ${hr} hours. Drop Factor: ${gttFactor} gtt/mL. Rate (gtt/min)?`, a: Math.round((vol*gttFactor)/(hr*60))});
+            }
+            // Weight based
+            for(let i=0; i<100; i++){
+                const kg = Math.floor(Math.random()*40)+50;
+                const mcg = [2, 5, 10][Math.floor(Math.random()*3)];
+                const bag = 400; const bagVol = 250;
+                const a = (mcg * kg * 60) / ((bag*1000)/bagVol);
+                bank.push({cat:'IV_KG', q:`Order: Dopamine ${mcg}mcg/kg/min. Weight: ${kg}kg. Bag: ${bag}mg/ ${bagVol}mL. Set pump (mL/hr).`, a: parseFloat(a.toFixed(1))});
             }
             return bank;
         }
 
         const ALL_QUESTIONS = generateItemBank();
-        
         const TILE_SIZE = 40;
-        const MAZE_SIZE = 15;
+        const MAZE_SIZE = 17;
         
         let state = {
             level: 1,
             player: { x: 1, y: 1 },
             maze: [],
+            solutionPath: [],
             questionsSolved: 0,
             totalRequired: 6,
             activeGate: null,
@@ -339,11 +390,11 @@
         canvas.height = TILE_SIZE * MAZE_SIZE;
 
         const levelThemes = {
-            1: { name: "Medical-Surgical Unit", finale: { q: "Ceftriaxone 1g. Supply: 500mg/10mL. Measure.", ans: 20, type: 'cup' } },
-            2: { name: "Pediatric Care", finale: { q: "Child: 10kg. Order: 15mg/kg. Supply: 50mg/5mL. Measure.", ans: 15, type: 'cup' } },
-            3: { name: "Step-Down Unit", finale: { q: "Heparin 1,200 units/hr. Supply: 25,000 units in 250mL. Rate?", ans: 12, type: 'pump' } },
-            4: { name: "Emergency Trauma", finale: { q: "Epinephrine 0.3mg SQ. Supply: 1mg/mL. Draw.", ans: 0.3, type: 'syringe' } },
-            5: { name: "Intensive Care", finale: { q: "Dopamine 5mcg/kg/min. Patient: 100kg. Supply: 400mg/250mL. Rate?", ans: 18.8, type: 'pump' } }
+            1: { finale: { q: "Ceftriaxone 1g IM. Supply: 500mg/10mL. Measure mL.", ans: 20, type: 'cup', unit: 'mL' } },
+            2: { finale: { q: "Morphine 4mg IV Push. Supply: 2mg/mL. Draw mL.", ans: 2, type: 'syringe', unit: 'mL' } },
+            3: { finale: { q: "D5W 1000mL over 8hr. Set mL/hr.", ans: 125, type: 'pump', unit: 'mL/hr' } },
+            4: { finale: { q: "NS 100mL over 1hr. Factor: 20 gtt/mL. Rate (gtt/min)?", ans: 33, type: 'pump', unit: 'gtt/min' } },
+            5: { finale: { q: "Dopamine 5mcg/kg/min. Pt: 70kg. Supply: 400mg/250mL. Set mL/hr.", ans: 13.1, type: 'pump', unit: 'mL/hr' } }
         };
 
         function generateMaze() {
@@ -370,18 +421,53 @@
                 } else { stack.pop(); }
             }
 
-            state.maze[1][1] = 4; // MAR (In)
-            state.maze[MAZE_SIZE-2][MAZE_SIZE-2] = 3; // Med Room (End)
-
-            let pathTiles = [];
-            for(let y=1; y<MAZE_SIZE-1; y++) {
-                for(let x=1; x<MAZE_SIZE-1; x++) {
-                    if(state.maze[y][x] === 0 && !(x===1 && y===1) && !(x===MAZE_SIZE-2 && y===MAZE_SIZE-2)) pathTiles.push({x,y});
+            for(let i=0; i < 22; i++) {
+                let rx = Math.floor(Math.random() * (MAZE_SIZE - 2)) + 1;
+                let ry = Math.floor(Math.random() * (MAZE_SIZE - 2)) + 1;
+                if(state.maze[ry][rx] === 1) {
+                    let adj = 0;
+                    [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx,dy]) => { if(state.maze[ry+dy][rx+dx] === 0) adj++; });
+                    if(adj >= 2) state.maze[ry][rx] = 0;
                 }
             }
-            pathTiles.sort(() => Math.random() - 0.5);
-            for(let i=0; i<9; i++) if(pathTiles[i]) state.maze[pathTiles[i].y][pathTiles[i].x] = 2; // 9 Gates
 
+            const end = {x: MAZE_SIZE-2, y: MAZE_SIZE-2};
+            const parent = {};
+            const queue = [start];
+            const visited = new Set(['1,1']);
+            while(queue.length > 0) {
+                const curr = queue.shift();
+                if(curr.x === end.x && curr.y === end.y) break;
+                [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx, dy]) => {
+                    const nx = curr.x+dx, ny = curr.y+dy;
+                    if(nx >= 0 && nx < MAZE_SIZE && ny >= 0 && ny < MAZE_SIZE && state.maze[ny][nx] !== 1 && !visited.has(`${nx},${ny}`)) {
+                        visited.add(`${nx},${ny}`);
+                        parent[`${nx},${ny}`] = curr;
+                        queue.push({x: nx, y: ny});
+                    }
+                });
+            }
+
+            state.solutionPath = [];
+            let c = end;
+            while(c) { state.solutionPath.push(c); c = parent[`${c.x},${c.y}`]; }
+
+            const pGates = state.solutionPath.slice(3, -3);
+            pGates.sort(() => Math.random() - 0.5);
+            for(let i=0; i<6; i++) if(pGates[i]) state.maze[pGates[i].y][pGates[i].x] = 2; 
+
+            let solSet = new Set(state.solutionPath.map(p => `${p.x},${p.y}`));
+            let distNeeded = 10;
+            for(let y=1; y<MAZE_SIZE-1 && distNeeded > 0; y++){
+                for(let x=1; x<MAZE_SIZE-1 && distNeeded > 0; x++){
+                    if(state.maze[y][x] === 0 && !solSet.has(`${x},${y}`) && Math.random() > 0.6) {
+                        state.maze[y][x] = 5;
+                        distNeeded--;
+                    }
+                }
+            }
+
+            state.maze[1][1] = 4; state.maze[end.y][end.x] = 3;
             state.questionsSolved = 0;
             state.player = {x: 1, y: 1};
             renderChecklist();
@@ -393,40 +479,39 @@
                 for(let x=0; x<MAZE_SIZE; x++){
                     const cell = state.maze[y][x];
                     const px = x*TILE_SIZE, py = y*TILE_SIZE;
-                    if(cell === 1) { ctx.fillStyle = "#0f172a"; ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE); }
-                    else { ctx.fillStyle = "#ffffff"; ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE); ctx.strokeStyle = "#f1f5f9"; ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE); }
-
-                    if(cell === 4) { 
-                        ctx.fillStyle = "#2563eb"; ctx.fillRect(px+2, py+2, TILE_SIZE-4, TILE_SIZE-4);
-                        ctx.font = "bold 10px Arial"; ctx.fillStyle="white"; ctx.textAlign="center"; ctx.fillText("MAR", px+TILE_SIZE/2, py+TILE_SIZE/2+4);
+                    if(cell === 1) {
+                        ctx.fillStyle = "#0f172a"; ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+                        ctx.strokeStyle = "#1e293b"; ctx.strokeRect(px+4, py+4, TILE_SIZE-8, TILE_SIZE-8);
+                    } else {
+                        ctx.fillStyle = "#ffffff"; ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
                     }
-                    if(cell === 3) { 
-                        ctx.fillStyle = state.questionsSolved >= state.totalRequired ? "#10b981" : "#94a3b8"; 
-                        ctx.fillRect(px+2, py+2, TILE_SIZE-4, TILE_SIZE-4);
-                        ctx.font = "bold 10px Arial"; ctx.fillStyle="white"; ctx.textAlign="center"; ctx.fillText("MED", px+TILE_SIZE/2, py+TILE_SIZE/2+4);
-                    }
-                    if(cell === 2) {
-                        ctx.fillStyle = "#fbbf24"; ctx.beginPath(); ctx.arc(px+TILE_SIZE/2, py+TILE_SIZE/2, TILE_SIZE/3, 0, Math.PI*2); ctx.fill();
-                        ctx.font = "bold 12px Arial"; ctx.fillStyle="#78350f"; ctx.textAlign="center"; ctx.fillText("Rx", px+TILE_SIZE/2, py+TILE_SIZE/2+5);
+                    if(cell === 4) { ctx.fillStyle = "#2563eb"; ctx.fillRect(px+2, py+2, TILE_SIZE-4, TILE_SIZE-4); }
+                    if(cell === 3) { ctx.fillStyle = state.questionsSolved >= state.totalRequired ? "#10b981" : "#475569"; ctx.fillRect(px+2, py+2, TILE_SIZE-4, TILE_SIZE-4); }
+                    if(cell === 2 || cell === 5) { 
+                        ctx.fillStyle = "#f59e0b"; ctx.beginPath(); ctx.arc(px+TILE_SIZE/2, py+TILE_SIZE/2, TILE_SIZE/3, 0, Math.PI*2); ctx.fill();
+                        ctx.font = "bold 10px Arial"; ctx.fillStyle="white"; ctx.textAlign="center"; ctx.fillText("Rx", px+TILE_SIZE/2, py+TILE_SIZE/2+4);
                     }
                 }
             }
-            ctx.fillStyle = "#f43f5e"; ctx.shadowBlur = 15; ctx.shadowColor = "rgba(244, 63, 94, 0.5)";
-            ctx.beginPath(); ctx.arc(state.player.x*TILE_SIZE+TILE_SIZE/2, state.player.y*TILE_SIZE+TILE_SIZE/2, TILE_SIZE/4, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#f43f5e"; ctx.shadowBlur = 10; ctx.shadowColor = "rgba(244, 63, 94, 0.6)";
+            ctx.beginPath(); ctx.arc(state.player.x*TILE_SIZE+TILE_SIZE/2, state.player.y*TILE_SIZE+TILE_SIZE/2, TILE_SIZE/3.5, 0, Math.PI*2); ctx.fill();
             ctx.shadowBlur = 0;
         }
 
         function handleKey(key) {
             if(document.querySelector('.modal.active')) return;
             let dx=0, dy=0;
-            if(key==='ArrowUp') dy=-1; if(key==='ArrowDown') dy=1; if(key==='ArrowLeft') dx=-1; if(key==='ArrowRight') dx=1;
+            if(key==='ArrowUp' || key==='w') dy=-1; 
+            if(key==='ArrowDown' || key==='s') dy=1; 
+            if(key==='ArrowLeft' || key==='a') dx=-1; 
+            if(key==='ArrowRight' || key==='d') dx=1;
             const nx = state.player.x + dx, ny = state.player.y + dy;
             if(nx >= 0 && nx < MAZE_SIZE && ny >= 0 && ny < MAZE_SIZE) {
                 const t = state.maze[ny][nx];
                 if(t !== 1) {
-                    if(t === 3 && state.questionsSolved < state.totalRequired) { alert("Complete 6 checks first!"); return; }
+                    if(t === 3 && state.questionsSolved < state.totalRequired) return;
                     state.player = {x: nx, y: ny};
-                    if(t === 2) openQuiz(nx, ny);
+                    if(t === 2 || t === 5) openQuiz(nx, ny, t);
                     if(t === 3) openFinale();
                 }
             }
@@ -434,33 +519,23 @@
         }
 
         function renderChecklist() {
-            const c = document.getElementById('checklist-container');
-            c.innerHTML = "";
+            const c = document.getElementById('checklist-container'); c.innerHTML = "";
             for(let i=1; i<=6; i++) {
                 const done = i <= state.questionsSolved;
                 const div = document.createElement('div');
                 div.className = `checklist-item ${done ? 'checklist-done' : 'checklist-todo'}`;
-                div.innerHTML = `<span>${done?'✅':'⚪'}</span> Patient ID Verified #${i}`;
+                div.innerHTML = `<span>${done?'✅':'⚪'}</span> Protocol Verification #${i}`;
                 c.appendChild(div);
             }
             document.getElementById('progress-count').innerText = `${state.questionsSolved} / 6`;
         }
 
-        function openQuiz(x, y) {
-            state.activeGate = { x, y };
-            // Pick a non-repeating question
-            let attempts = 0;
-            let q;
-            do {
-                q = ALL_QUESTIONS[Math.floor(Math.random()*ALL_QUESTIONS.length)];
-                attempts++;
-            } while (state.usedQuestions.has(q.q) && attempts < 50);
-            
-            state.currentQ = q;
-            state.usedQuestions.add(q.q);
-            
+        function openQuiz(x, y, type) {
+            state.activeGate = { x, y, type };
+            const floorConfig = FLOOR_CONFIG[state.level];
+            let q; do { q = ALL_QUESTIONS[Math.floor(Math.random()*ALL_QUESTIONS.length)]; } while (!floorConfig.cats.includes(q.cat) || state.usedQuestions.has(q.q));
+            state.currentQ = q; state.usedQuestions.add(q.q);
             document.getElementById('q-text').innerText = q.q;
-            document.getElementById('q-category').innerText = categories[q.cat].label;
             document.getElementById('q-unit').innerText = categories[q.cat].unit;
             document.getElementById('q-input').value = "";
             document.getElementById('q-feedback').innerText = "";
@@ -470,14 +545,13 @@
 
         function submitDose() {
             const v = parseFloat(document.getElementById('q-input').value);
-            if(Math.abs(v - state.currentQ.a) < 0.1) {
+            if(Math.abs(v - state.currentQ.a) < 0.05) {
+                if(state.activeGate.type === 2) { state.questionsSolved++; renderChecklist(); }
                 state.maze[state.activeGate.y][state.activeGate.x] = 0;
-                state.questionsSolved++;
-                renderChecklist();
                 document.getElementById('quiz-modal').classList.remove('active');
                 draw();
             } else {
-                document.getElementById('q-feedback').innerText = "Incorrect Calculation";
+                document.getElementById('q-feedback').innerText = "CALCULATION ERROR";
                 document.getElementById('q-feedback').style.color = "#e11d48";
             }
         }
@@ -486,82 +560,107 @@
             const f = levelThemes[state.level].finale;
             state.targetVal = f.ans;
             state.currentVal = 0;
+            document.getElementById('active-measure-label').innerText = `0.0 ${f.unit}`;
             document.getElementById('finale-math-q').innerText = f.q;
             const area = document.getElementById('equipment-visual-area');
             area.innerHTML = "";
 
             if(f.type === 'cup' || f.type === 'syringe') {
                 const eq = document.createElement('div');
-                eq.className = f.type === 'cup' ? 'cup-barrel shadow-inner rounded-b-xl' : 'syringe-barrel shadow-inner';
+                eq.className = f.type === 'cup' ? 'cup-barrel' : 'syringe-barrel';
                 const fill = document.createElement('div');
                 fill.className = "absolute bg-blue-500/60 border-t-4 border-blue-400 pointer-events-none transition-all";
-                eq.onmousedown = (e) => {
+                
+                const updateMeasure = (e) => {
                     const r = eq.getBoundingClientRect();
                     if(f.type==='cup') {
-                        const h = 100 - ((e.clientY - r.top)/r.height * 100);
+                        const h = 100 - Math.min(100, Math.max(0, (e.clientY - r.top)/r.height * 100));
                         fill.style.bottom = "0"; fill.style.width="100%"; fill.style.height = h + '%';
                         state.currentVal = (h/2.5).toFixed(1);
                     } else {
-                        const w = ((e.clientX - r.left)/r.width * 100);
+                        const w = Math.min(100, Math.max(0, (e.clientX - r.left)/r.width * 100));
                         fill.style.left = "0"; fill.style.height="100%"; fill.style.width = w + '%';
-                        state.currentVal = (w/100).toFixed(2);
+                        state.currentVal = (w/10).toFixed(2);
                     }
+                    document.getElementById('active-measure-label').innerText = `${state.currentVal} ${f.unit}`;
                 };
+
+                eq.onmousedown = (e) => {
+                    updateMeasure(e);
+                    window.onmousemove = updateMeasure;
+                    window.onmouseup = () => window.onmousemove = null;
+                };
+
                 eq.appendChild(fill); area.appendChild(eq);
+                document.getElementById('active-measure-label').classList.remove('hidden');
             } else {
                 const p = document.createElement('div'); p.className = "iv-pump-chassis";
-                p.innerHTML = `<div class="bg-slate-900 p-4 rounded-xl mb-4 border border-slate-700 shadow-inner"><p class="text-[8px] text-blue-400 uppercase font-black">RATE ML/HR</p><p id="pump-display" class="text-white text-3xl font-mono">0.0</p></div><div class="grid grid-cols-3 gap-2">${[1,2,3,4,5,6,7,8,9,0,'.','C'].map(k=>`<button onclick="pumpKey('${k}')" class="bg-white p-3 rounded-xl font-bold text-slate-700 border border-slate-300 shadow-sm">${k}</button>`).join('')}</div>`;
+                p.innerHTML = `<div class="bg-slate-900 p-4 rounded-xl mb-4 border-2 border-slate-700 shadow-inner text-center"><p class="text-[8px] text-blue-400 uppercase font-black">RATE ${f.unit}</p><p id="pump-display" class="text-white text-3xl font-mono">0.0</p></div><div class="grid grid-cols-3 gap-2">${[1,2,3,4,5,6,7,8,9,0,'.','C'].map(k=>`<button onclick="pumpKey('${k}', '${f.unit}')" class="bg-white p-3 rounded-xl font-bold text-slate-800 border-2 border-slate-300 shadow-sm">${k}</button>`).join('')}</div>`;
                 area.appendChild(p); state.currentVal = "0";
+                document.getElementById('active-measure-label').classList.add('hidden');
             }
             document.getElementById('finale-step-1').classList.remove('hidden');
             document.getElementById('finale-step-2').classList.add('hidden');
             document.getElementById('case-modal').classList.add('active');
         }
 
-        function pumpKey(k) {
+        function pumpKey(k, unit) {
             if(k==='C') state.currentVal = "0"; else if(state.currentVal==="0") state.currentVal=k; else state.currentVal+=k;
             document.getElementById('pump-display').innerText = state.currentVal;
+            document.getElementById('active-measure-label').innerText = `${state.currentVal} ${unit}`;
         }
 
         function verifyFinaleAction() {
-            if(Math.abs(parseFloat(state.currentVal) - state.targetVal) < 0.5) {
+            if(Math.abs(parseFloat(state.currentVal) - state.targetVal) < 1) {
                 document.getElementById('finale-step-1').classList.add('hidden');
                 loadNCLEX();
-            } else alert(`Clinical Error. Administration dose ${state.currentVal} is incorrect.`);
+            } else {
+                const msg = document.getElementById('active-measure-label');
+                msg.innerText = "DOSE ERROR!"; msg.style.color = "#f43f5e";
+                setTimeout(() => { msg.style.color = "white"; }, 1000);
+            }
         }
 
         function loadNCLEX() {
             const b = document.getElementById('nclex-options'); b.innerHTML = "";
             document.getElementById('nclex-rationale').classList.add('hidden');
-            document.getElementById('nclex-q').innerText = "Medication safely administered. Select the next priority nursing action for this patient's medication regimen.";
+            const qSet = nclexQuestions[Math.floor(Math.random()*nclexQuestions.length)];
+            document.getElementById('nclex-q').innerText = qSet.q;
             
-            const options = [{t: "Monitor vital signs and observe for therapeutic effect.", c:true, r:"Continuous assessment ensures the medication is effective and that side effects are caught early."}];
-            options.forEach(o => {
+            qSet.options.forEach(o => {
                 const btn = document.createElement('button');
-                btn.className = "w-full text-left p-6 bg-white rounded-3xl border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-base font-bold shadow-sm";
-                btn.innerText = o.t;
+                btn.className = "w-full text-left p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-base font-bold shadow-sm flex items-start gap-4";
+                btn.innerHTML = `<span>${o.t.split('.')[0]}.</span> <span>${o.t.split('. ')[1]}</span>`;
                 btn.onclick = () => {
                     document.getElementById('nclex-rationale').classList.remove('hidden');
-                    document.getElementById('rationale-text').innerText = o.r;
+                    document.getElementById('rationale-text').innerHTML = `<span class="${o.c ? 'text-emerald-600' : 'text-rose-600'} font-black uppercase text-xs mb-2 block">${o.c ? 'Correct' : 'Incorrect'} Response</span> ${o.r}`;
                     document.getElementById('finale-continue').onclick = () => {
+                        if(!o.c) return;
                         document.getElementById('case-modal').classList.remove('active');
                         state.level++; if(state.level > 5) state.level = 1;
-                        document.getElementById('level-display').innerText = `FLOOR ${state.level}`;
-                        document.getElementById('unit-name').innerText = levelThemes[state.level].name;
-                        generateMaze(); draw();
+                        updateFloorUI(); generateMaze(); draw();
                     };
+                    document.getElementById('finale-continue').className = o.c ? "mt-8 w-full bg-slate-900 py-5 rounded-2xl text-white font-black text-lg uppercase tracking-widest hover:bg-black" : "mt-8 w-full bg-slate-300 py-5 rounded-2xl text-slate-500 font-black text-lg uppercase tracking-widest cursor-not-allowed";
+                    document.getElementById('finale-continue').innerText = o.c ? "Clock Out & Proceed" : "Re-read and Select Correct Answer";
                 };
                 b.appendChild(btn);
             });
             document.getElementById('finale-step-2').classList.remove('hidden');
         }
 
+        function updateFloorUI() {
+            const cfg = FLOOR_CONFIG[state.level];
+            document.getElementById('level-display').innerText = `FLOOR ${state.level}`;
+            document.getElementById('unit-name').innerText = cfg.name;
+            document.getElementById('floor-specialty').innerText = `Focus: ${cfg.specialty}`;
+        }
+
         function calcPress(v) { state.calcValue==='0'?state.calcValue=v:state.calcValue+=v; document.getElementById('calc-display').innerText=state.calcValue; }
         function calcClear() { state.calcValue='0'; document.getElementById('calc-display').innerText='0'; }
-        function calcEval() { try{ state.calcValue = eval(state.calcValue).toString(); }catch{state.calcValue="Err";} document.getElementById('calc-display').innerText=state.calcValue; }
+        function calcEval() { try{ state.calcValue = Number(eval(state.calcValue).toFixed(3)).toString(); }catch{state.calcValue="Err";} document.getElementById('calc-display').innerText=state.calcValue; }
 
         window.addEventListener('keydown', e => handleKey(e.key));
-        window.onload = () => { generateMaze(); draw(); };
+        window.onload = () => { updateFloorUI(); generateMaze(); draw(); };
     </script>
 </body>
 </html>
