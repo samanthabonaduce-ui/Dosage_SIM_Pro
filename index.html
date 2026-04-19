@@ -138,7 +138,6 @@
             40%, 60% { transform: translate3d(4px, 0, 0); }
         }
 
-        /* Device Specific Styles */
         .device-cup {
             width: 120px;
             height: 140px;
@@ -249,7 +248,7 @@
 
             <div class="flex-1">
                 <div class="flex justify-between items-end mb-4">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Primary Gate Status</h3>
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order Verification</h3>
                     <span id="progress-val" class="text-xs font-bold text-blue-600">0 / 6 Complete</span>
                 </div>
                 <div id="checklist-container"></div>
@@ -260,14 +259,13 @@
                 <ul id="guideline-list" class="text-[11px] text-blue-700 font-bold leading-relaxed space-y-2">
                     <li class="flex gap-2">
                         <span>•</span>
-                        <span>Unlock 6 PRIMARY gates (on the critical path) to enter the Med Room. Distractor gates provide practice but don't count toward the total.</span>
+                        <span>Complete 6 order verifications to unlock the Med Room. Distractor gates provide practice but don't count toward the total.</span>
                     </li>
                 </ul>
             </div>
         </aside>
     </div>
 
-    <!-- REFINED FINALE MODAL -->
     <div id="finale-modal" class="fixed inset-0 bg-slate-900/95 z-[200] hidden items-center justify-center p-6 overflow-y-auto">
         <div id="finale-stage-1" class="bg-white rounded-[32px] p-10 max-w-2xl w-full">
             <div class="flex items-center gap-3 mb-4">
@@ -275,12 +273,7 @@
             </div>
             <h2 class="text-2xl font-black mb-2 text-slate-900">Med Room: Clinical Challenge</h2>
             <p id="finale-math-q" class="text-slate-600 mb-8 font-semibold text-lg"></p>
-            
-            <!-- Interactive Area Container -->
-            <div id="interactive-container" class="bg-slate-100 rounded-2xl p-10 mb-8 relative border-2 border-slate-200 flex flex-col items-center justify-center min-h-[200px]">
-                <!-- Interactive elements injected here by JS -->
-            </div>
-            
+            <div id="interactive-container" class="bg-slate-100 rounded-2xl p-10 mb-8 relative border-2 border-slate-200 flex flex-col items-center justify-center min-h-[200px]"></div>
             <button onclick="checkFinalStage1()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold text-sm uppercase tracking-widest hover:shadow-lg transition-all">Verify Setup</button>
         </div>
 
@@ -290,11 +283,7 @@
             </div>
             <h2 class="text-2xl font-black mb-2 text-slate-900">NCLEX Critical Thinking</h2>
             <p id="nclex-q-text" class="text-slate-600 mb-8 font-semibold text-lg leading-snug"></p>
-            
-            <div id="nclex-options" class="grid gap-3 mb-8">
-                <!-- Options injected by JS -->
-            </div>
-            
+            <div id="nclex-options" class="grid gap-3 mb-8"></div>
             <p id="nclex-feedback" class="text-center text-xs font-bold uppercase mb-4 h-4"></p>
             <button id="nclex-submit" onclick="checkFinalStage2()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold text-sm uppercase tracking-widest">Submit Answer</button>
         </div>
@@ -318,23 +307,140 @@
         };
 
         const BANK = [
-            { id: 101, floor: 1, q: "Order: Metoprolol 25 mg PO. Supply: 50 mg tablets. How many tabs?", a: 0.5, u: "TABS", type: "PO" },
-            { id: 102, floor: 1, q: "Order: Heparin 5,000 Units SQ. Supply: 10,000 Units/mL. How many mL?", a: 0.5, u: "mL", type: "SQ" },
-            { id: 103, floor: 1, q: "Order: Epinephrine 0.3 mg IM. Supply: 1 mg/mL. How many mL?", a: 0.3, u: "mL", type: "IM" },
-            { id: 104, floor: 1, q: "Order: Prednisone 10 mg PO. Supply: 5 mg tablets. How many tabs?", a: 2, u: "TABS", type: "PO" },
+            // FLOOR 1 - PO, SQ, IM
+            { id: 101, floor: 1, q: "Order: Warfarin 7.5 mg PO. Supply: 5 mg tablets. How many tabs?", a: 1.5, u: "TABS", type: "PO" },
+            { id: 102, floor: 1, q: "Order: Lisinopril 20 mg PO. Supply: 40 mg tablets. How many tabs?", a: 0.5, u: "TABS", type: "PO" },
+            { id: 103, floor: 1, q: "Order: Digoxin 0.125 mg PO. Supply: 0.25 mg tabs. How many tabs?", a: 0.5, u: "TABS", type: "PO" },
+            { id: 104, floor: 1, q: "Order: Prednisone 15 mg PO. Supply: 5 mg tabs. How many tabs?", a: 3, u: "TABS", type: "PO" },
             { id: 105, floor: 1, q: "Order: Amoxicillin 500 mg PO. Supply: 250 mg/5 mL. How many mL?", a: 10, u: "mL", type: "PO" },
-            { id: 106, floor: 1, q: "Order: Digoxin 0.125 mg PO. Supply: 0.25 mg tablets. How many tabs?", a: 0.5, u: "TABS", type: "PO" },
-            { id: 201, floor: 2, q: "Order: Digoxin 0.125 mg IV Push. Supply: 0.25 mg/mL. How many mL?", a: 0.5, u: "mL", type: "IVP" },
-            { id: 202, floor: 2, q: "Order: Morphine 4 mg IV Push. Supply: 10 mg/mL. How many mL?", a: 0.4, u: "mL", type: "IVP" },
-            { id: 203, floor: 2, q: "Order: Furosemide 40 mg IV Push. Supply: 10 mg/mL. How many mL?", a: 4, u: "mL", type: "IVP" },
-            { id: 204, floor: 2, q: "Order: Hydromorphone 0.5 mg IV Push. Supply: 2 mg/mL. How many mL?", a: 0.25, u: "mL", type: "IVP" },
-            { id: 301, floor: 3, q: "Order: 1,000 mL NS to infuse over 8 hours. What is the mL/hr rate?", a: 125, u: "mL/hr", type: "INF" },
-            { id: 302, floor: 3, q: "Order: 500 mL D5W to infuse over 4 hours. What is the mL/hr rate?", a: 125, u: "mL/hr", type: "INF" },
-            { id: 306, floor: 3, q: "Order: Heparin 1,000 units/hr. Supply: 25,000 units in 500 mL NS. Calculate mL/hr.", a: 20, u: "mL/hr", type: "INF" },
-            { id: 401, floor: 4, q: "Order: 100 mL NS over 30 min. Tubing drop factor: 15 gtt/mL. Calculate gtt/min.", a: 50, u: "gtt/min", type: "DRIP" },
-            { id: 402, floor: 4, q: "Order: 1,000 mL LR over 10 hours. Drop factor: 10 gtt/mL. Calculate gtt/min.", a: 17, u: "gtt/min", type: "DRIP" },
-            { id: 601, floor: 5, q: "Order: Dopamine 5 mcg/kg/min. Patient weight: 80 kg. What is the mcg/min dose?", a: 400, u: "mcg/min", type: "WBT" },
-            { id: 602, floor: 5, q: "Order: Heparin 18 units/kg/hr. Patient weight: 70 kg. Calculate units/hr.", a: 1260, u: "units/hr", type: "WBT" }
+            { id: 106, floor: 1, q: "Order: Heparin 5,000 units SQ. Supply: 10,000 units/mL. How many mL?", a: 0.5, u: "mL", type: "SQ" },
+            { id: 107, floor: 1, q: "Order: Potassium Chloride 40 mEq PO. Supply: 20 mEq/15 mL. How many mL?", a: 30, u: "mL", type: "PO" },
+            { id: 108, floor: 1, q: "Order: Metoprolol 25 mg PO. Supply: 50 mg tabs. How many tabs?", a: 0.5, u: "TABS", type: "PO" },
+            { id: 109, floor: 1, q: "Order: Furosemide 40 mg PO. Supply: 20 mg tabs. How many tabs?", a: 2, u: "TABS", type: "PO" },
+            { id: 110, floor: 1, q: "Order: Acetaminophen 650 mg PO. Supply: 325 mg tabs. How many tabs?", a: 2, u: "TABS", type: "PO" },
+            { id: 111, floor: 1, q: "Order: Docusate Sodium 100 mg PO. Supply: 50 mg caps. How many caps?", a: 2, u: "CAPS", type: "PO" },
+            { id: 112, floor: 1, q: "Order: Gabapentin 600 mg PO. Supply: 300 mg caps. How many caps?", a: 2, u: "CAPS", type: "PO" },
+            { id: 113, floor: 1, q: "Order: Levothyroxine 75 mcg PO. Supply: 50 mcg tabs. How many tabs?", a: 1.5, u: "TABS", type: "PO" },
+            { id: 114, floor: 1, q: "Order: Vitamin D 2000 units PO. Supply: 1000 units tabs. How many tabs?", a: 2, u: "TABS", type: "PO" },
+            { id: 115, floor: 1, q: "Order: Ibuprofen 800 mg PO. Supply: 400 mg tabs. How many tabs?", a: 2, u: "TABS", type: "PO" },
+            { id: 116, floor: 1, q: "Order: Cephalexin 500 mg PO. Supply: 250 mg caps. How many caps?", a: 2, u: "CAPS", type: "PO" },
+            { id: 117, floor: 1, q: "Order: Ciprofloxacin 500 mg PO. Supply: 250 mg tabs. How many tabs?", a: 2, u: "TABS", type: "PO" },
+            { id: 118, floor: 1, q: "Order: Metformin 1000 mg PO. Supply: 500 mg tabs. How many tabs?", a: 2, u: "TABS", type: "PO" },
+            { id: 119, floor: 1, q: "Order: Atorvastatin 40 mg PO. Supply: 20 mg tabs. How many tabs?", a: 2, u: "TABS", type: "PO" },
+            { id: 120, floor: 1, q: "Order: Spironolactone 25 mg PO. Supply: 50 mg tabs. How many tabs?", a: 0.5, u: "TABS", type: "PO" },
+            { id: 121, floor: 1, q: "Order: Pantoprazole 40 mg PO. Supply: 20 mg tabs. How many tabs?", a: 2, u: "TABS", type: "PO" },
+            { id: 122, floor: 1, q: "Order: Sertraline 50 mg PO. Supply: 100 mg tabs. How many tabs?", a: 0.5, u: "TABS", type: "PO" },
+            { id: 123, floor: 1, q: "Order: Amlodipine 10 mg PO. Supply: 5 mg tabs. How many tabs?", a: 2, u: "TABS", type: "PO" },
+            { id: 124, floor: 1, q: "Order: Allopurinol 300 mg PO. Supply: 100 mg tabs. How many tabs?", a: 3, u: "TABS", type: "PO" },
+            { id: 125, floor: 1, q: "Order: Losartan 50 mg PO. Supply: 25 mg tabs. How many tabs?", a: 2, u: "TABS", type: "PO" },
+
+            // FLOOR 2 - IV PUSH
+            { id: 201, floor: 2, q: "Order: Morphine 4 mg IV Push. Supply: 10 mg/mL. How many mL?", a: 0.4, u: "mL", type: "IVP" },
+            { id: 202, floor: 2, q: "Order: Furosemide 40 mg IV Push. Supply: 10 mg/mL. How many mL?", a: 4, u: "mL", type: "IVP" },
+            { id: 203, floor: 2, q: "Order: Ondansetron 4 mg IV Push. Supply: 2 mg/mL. How many mL?", a: 2, u: "mL", type: "IVP" },
+            { id: 204, floor: 2, q: "Order: Labetalol 10 mg IV Push. Supply: 5 mg/mL. How many mL?", a: 2, u: "mL", type: "IVP" },
+            { id: 205, floor: 2, q: "Order: Metoprolol 5 mg IV Push. Supply: 1 mg/mL. How many mL?", a: 5, u: "mL", type: "IVP" },
+            { id: 206, floor: 2, q: "Order: Famotidine 20 mg IV Push. Supply: 10 mg/mL. How many mL?", a: 2, u: "mL", type: "IVP" },
+            { id: 207, floor: 2, q: "Order: Hydromorphone 0.5 mg IVP. Supply: 2 mg/mL. How many mL?", a: 0.25, u: "mL", type: "IVP" },
+            { id: 208, floor: 2, q: "Order: Ketorolac 30 mg IVP. Supply: 60 mg/2mL. How many mL?", a: 1, u: "mL", type: "IVP" },
+            { id: 209, floor: 2, q: "Order: Methylprednisolone 125 mg IVP. Supply: 125 mg/2mL. How many mL?", a: 2, u: "mL", type: "IVP" },
+            { id: 210, floor: 2, q: "Order: Lorazepam 1 mg IVP. Supply: 2 mg/mL. How many mL?", a: 0.5, u: "mL", type: "IVP" },
+            { id: 211, floor: 2, q: "Order: Digoxin 0.25 mg IVP. Supply: 0.5 mg/2mL. How many mL?", a: 1, u: "mL", type: "IVP" },
+            { id: 212, floor: 2, q: "Order: Dexamethasone 4 mg IVP. Supply: 10 mg/mL. How many mL?", a: 0.4, u: "mL", type: "IVP" },
+            { id: 213, floor: 2, q: "Order: Naloxone 0.4 mg IVP. Supply: 0.4 mg/mL. How many mL?", a: 1, u: "mL", type: "IVP" },
+            { id: 214, floor: 2, q: "Order: Midazolam 2 mg IVP. Supply: 5 mg/mL. How many mL?", a: 0.4, u: "mL", type: "IVP" },
+            { id: 215, floor: 2, q: "Order: Promethazine 12.5 mg IVP. Supply: 25 mg/mL. How many mL?", a: 0.5, u: "mL", type: "IVP" },
+            { id: 216, floor: 2, q: "Order: Haloperidol 2 mg IVP. Supply: 5 mg/mL. How many mL?", a: 0.4, u: "mL", type: "IVP" },
+            { id: 217, floor: 2, q: "Order: Chlorpromazine 25 mg IVP. Supply: 25 mg/mL. How many mL?", a: 1, u: "mL", type: "IVP" },
+            { id: 218, floor: 2, q: "Order: Phenytoin 100 mg IVP. Supply: 50 mg/mL. How many mL?", a: 2, u: "mL", type: "IVP" },
+            { id: 219, floor: 2, q: "Order: Valproate 500 mg IVP. Supply: 100 mg/mL. How many mL?", a: 5, u: "mL", type: "IVP" },
+            { id: 220, floor: 2, q: "Order: Heparin 5000 units IVP. Supply: 10000 units/mL. How many mL?", a: 0.5, u: "mL", type: "IVP" },
+            { id: 221, floor: 2, q: "Order: Epinephrine 1 mg IVP. Supply: 1 mg/10mL. How many mL?", a: 10, u: "mL", type: "IVP" },
+            { id: 222, floor: 2, q: "Order: Adenosine 6 mg IVP. Supply: 3 mg/mL. How many mL?", a: 2, u: "mL", type: "IVP" },
+            { id: 223, floor: 2, q: "Order: Amiodarone 150 mg IVP. Supply: 50 mg/mL. How many mL?", a: 3, u: "mL", type: "IVP" },
+            { id: 224, floor: 2, q: "Order: Calcium Gluconate 1 g IVP. Supply: 100 mg/mL. How many mL?", a: 10, u: "mL", type: "IVP" },
+            { id: 225, floor: 2, q: "Order: Magnesium Sulfate 2 g IVP. Supply: 500 mg/mL. How many mL?", a: 4, u: "mL", type: "IVP" },
+
+            // FLOOR 3 - ANTIBIOTIC INFUSIONS (25 Questions)
+            { id: 301, floor: 3, q: "Order: Vancomycin 1 g in 250 mL NS over 90 min. Calculate mL/hr.", a: 166.7, u: "mL/hr", type: "INF" },
+            { id: 302, floor: 3, q: "Order: Zosyn 3.375 g in 100 mL NS over 4 hours. Calculate mL/hr.", a: 25, u: "mL/hr", type: "INF" },
+            { id: 303, floor: 3, q: "Order: Cefazolin 1 g in 50 mL NS over 30 min. Calculate mL/hr.", a: 100, u: "mL/hr", type: "INF" },
+            { id: 304, floor: 3, q: "Order: Rocephin 1 g in 100 mL NS over 60 min. Calculate mL/hr.", a: 100, u: "mL/hr", type: "INF" },
+            { id: 305, floor: 3, q: "Order: Metronidazole 500 mg in 100 mL over 60 min. Calculate mL/hr.", a: 100, u: "mL/hr", type: "INF" },
+            { id: 306, floor: 3, q: "Order: Gentamicin 80 mg in 50 mL over 30 min. Calculate mL/hr.", a: 100, u: "mL/hr", type: "INF" },
+            { id: 307, floor: 3, q: "Order: Clindamycin 600 mg in 100 mL over 45 min. Calculate mL/hr.", a: 133.3, u: "mL/hr", type: "INF" },
+            { id: 308, floor: 3, q: "Order: Azithromycin 500 mg in 250 mL over 60 min. Calculate mL/hr.", a: 250, u: "mL/hr", type: "INF" },
+            { id: 309, floor: 3, q: "Order: Levofloxacin 500 mg in 100 mL over 60 min. Calculate mL/hr.", a: 100, u: "mL/hr", type: "INF" },
+            { id: 310, floor: 3, q: "Order: Tobramycin 100 mg in 100 mL over 40 min. Calculate mL/hr.", a: 150, u: "mL/hr", type: "INF" },
+            { id: 311, floor: 3, q: "Order: Ampicillin 1 g in 50 mL over 15 min. Calculate mL/hr.", a: 200, u: "mL/hr", type: "INF" },
+            { id: 312, floor: 3, q: "Order: Linezolid 600 mg in 300 mL over 2 hours. Calculate mL/hr.", a: 150, u: "mL/hr", type: "INF" },
+            { id: 313, floor: 3, q: "Order: Erythromycin 500 mg in 250 mL over 60 min. Calculate mL/hr.", a: 250, u: "mL/hr", type: "INF" },
+            { id: 314, floor: 3, q: "Order: Acyclovir 500 mg in 100 mL over 60 min. Calculate mL/hr.", a: 100, u: "mL/hr", type: "INF" },
+            { id: 315, floor: 3, q: "Order: Nafcillin 2 g in 100 mL over 30 min. Calculate mL/hr.", a: 200, u: "mL/hr", type: "INF" },
+            { id: 316, floor: 3, q: "Order: Oxacillin 1 g in 50 mL over 20 min. Calculate mL/hr.", a: 150, u: "mL/hr", type: "INF" },
+            { id: 317, floor: 3, q: "Order: Imipenem 500 mg in 100 mL over 30 min. Calculate mL/hr.", a: 200, u: "mL/hr", type: "INF" },
+            { id: 318, floor: 3, q: "Order: Piperacillin 2.25 g in 50 mL over 30 min. Calculate mL/hr.", a: 100, u: "mL/hr", type: "INF" },
+            { id: 319, floor: 3, q: "Order: Meropenem 1 g in 50 mL over 15 min. Calculate mL/hr.", a: 200, u: "mL/hr", type: "INF" },
+            { id: 320, floor: 3, q: "Order: Fluconazole 200 mg in 100 mL over 60 min. Calculate mL/hr.", a: 100, u: "mL/hr", type: "INF" },
+            { id: 321, floor: 3, q: "Order: Ciprofloxacin 400 mg in 200 mL over 60 min. Calculate mL/hr.", a: 200, u: "mL/hr", type: "INF" },
+            { id: 322, floor: 3, q: "Order: Amikacin 500 mg in 100 mL over 45 min. Calculate mL/hr.", a: 133.3, u: "mL/hr", type: "INF" },
+            { id: 323, floor: 3, q: "Order: Penicillin G 5 million units in 100 mL over 60 min. mL/hr?", a: 100, u: "mL/hr", type: "INF" },
+            { id: 324, floor: 3, q: "Order: Daptomycin 500 mg in 50 mL over 30 min. Calculate mL/hr.", a: 100, u: "mL/hr", type: "INF" },
+            { id: 325, floor: 3, q: "Order: Tigecycline 50 mg in 100 mL over 60 min. Calculate mL/hr.", a: 100, u: "mL/hr", type: "INF" },
+
+            // FLOOR 4 - DRIP RATES / ANTIBIOTICS (25 Questions)
+            { id: 401, floor: 4, q: "Order: Vancomycin 250 mL over 90 min. Drop Factor: 15 gtt/mL. gtt/min?", a: 42, u: "gtt/min", type: "DRIP" },
+            { id: 402, floor: 4, q: "Order: Cefazolin 50 mL over 30 min. Drop Factor: 10 gtt/mL. gtt/min?", a: 17, u: "gtt/min", type: "DRIP" },
+            { id: 403, floor: 4, q: "Order: Rocephin 100 mL over 60 min. Drop Factor: 60 gtt/mL. gtt/min?", a: 100, u: "gtt/min", type: "DRIP" },
+            { id: 404, floor: 4, q: "Order: Metronidazole 100 mL over 60 min. Drop Factor: 15 gtt/mL. gtt/min?", a: 25, u: "gtt/min", type: "DRIP" },
+            { id: 405, floor: 4, q: "Order: Zosyn 100 mL over 4 hrs. Drop Factor: 60 gtt/mL. gtt/min?", a: 25, u: "gtt/min", type: "DRIP" },
+            { id: 406, floor: 4, q: "Order: Clindamycin 100 mL over 45 min. Drop Factor: 10 gtt/mL. gtt/min?", a: 22, u: "gtt/min", type: "DRIP" },
+            { id: 407, floor: 4, q: "Order: Tobramycin 100 mL over 40 min. Drop Factor: 20 gtt/mL. gtt/min?", a: 50, u: "gtt/min", type: "DRIP" },
+            { id: 408, floor: 4, q: "Order: Ampicillin 50 mL over 15 min. Drop Factor: 15 gtt/mL. gtt/min?", a: 50, u: "gtt/min", type: "DRIP" },
+            { id: 409, floor: 4, q: "Order: Nafcillin 100 mL over 30 min. Drop Factor: 10 gtt/mL. gtt/min?", a: 33, u: "gtt/min", type: "DRIP" },
+            { id: 410, floor: 4, q: "Order: Imipenem 100 mL over 30 min. Drop Factor: 60 gtt/mL. gtt/min?", a: 200, u: "gtt/min", type: "DRIP" },
+            { id: 411, floor: 4, q: "Order: Fluconazole 100 mL over 60 min. Drop Factor: 20 gtt/mL. gtt/min?", a: 33, u: "gtt/min", type: "DRIP" },
+            { id: 412, floor: 4, q: "Order: Gentamicin 50 mL over 30 min. Drop Factor: 15 gtt/mL. gtt/min?", a: 25, u: "gtt/min", type: "DRIP" },
+            { id: 413, floor: 4, q: "Order: Azithromycin 250 mL over 60 min. Drop Factor: 20 gtt/mL. gtt/min?", a: 83, u: "gtt/min", type: "DRIP" },
+            { id: 414, floor: 4, q: "Order: Levofloxacin 100 mL over 60 min. Drop Factor: 60 gtt/mL. gtt/min?", a: 100, u: "gtt/min", type: "DRIP" },
+            { id: 415, floor: 4, q: "Order: Meropenem 50 mL over 15 min. Drop Factor: 15 gtt/mL. gtt/min?", a: 50, u: "gtt/min", type: "DRIP" },
+            { id: 416, floor: 4, q: "Order: Acyclovir 100 mL over 60 min. Drop Factor: 10 gtt/mL. gtt/min?", a: 17, u: "gtt/min", type: "DRIP" },
+            { id: 417, floor: 4, q: "Order: Erythromycin 250 mL over 60 min. Drop Factor: 15 gtt/mL. gtt/min?", a: 63, u: "gtt/min", type: "DRIP" },
+            { id: 418, floor: 4, q: "Order: Linezolid 300 mL over 2 hrs. Drop Factor: 20 gtt/mL. gtt/min?", a: 50, u: "gtt/min", type: "DRIP" },
+            { id: 419, floor: 4, q: "Order: Piperacillin 50 mL over 30 min. Drop Factor: 60 gtt/mL. gtt/min?", a: 100, u: "gtt/min", type: "DRIP" },
+            { id: 420, floor: 4, q: "Order: Oxacillin 50 mL over 20 min. Drop Factor: 15 gtt/mL. gtt/min?", a: 38, u: "gtt/min", type: "DRIP" },
+            { id: 421, floor: 4, q: "Order: Amikacin 100 mL over 45 min. Drop Factor: 15 gtt/mL. gtt/min?", a: 33, u: "gtt/min", type: "DRIP" },
+            { id: 422, floor: 4, q: "Order: Daptomycin 50 mL over 30 min. Drop Factor: 60 gtt/mL. gtt/min?", a: 100, u: "gtt/min", type: "DRIP" },
+            { id: 423, floor: 4, q: "Order: Tigecycline 100 mL over 60 min. Drop Factor: 15 gtt/mL. gtt/min?", a: 25, u: "gtt/min", type: "DRIP" },
+            { id: 424, floor: 4, q: "Order: Ciprofloxacin 200 mL over 60 min. Drop Factor: 20 gtt/mL. gtt/min?", a: 67, u: "gtt/min", type: "DRIP" },
+            { id: 425, floor: 4, q: "Order: Penicillin G 100 mL over 60 min. Drop Factor: 10 gtt/mL. gtt/min?", a: 17, u: "gtt/min", type: "DRIP" },
+
+            // FLOOR 5 - CRITICAL CARE (Nitro, Epi, Norepi - 25 Questions)
+            { id: 501, floor: 5, q: "Order: Norepinephrine 0.1 mcg/kg/min. Pt: 80 kg. Supply: 4 mg / 250 mL. mL/hr?", a: 30, u: "mL/hr", type: "WBT" },
+            { id: 502, floor: 5, q: "Order: Nitroglycerin 10 mcg/min. Supply: 50 mg / 250 mL. mL/hr?", a: 3, u: "mL/hr", type: "WBT" },
+            { id: 503, floor: 5, q: "Order: Epinephrine 0.05 mcg/kg/min. Pt: 70 kg. Supply: 4 mg / 250 mL. mL/hr?", a: 13.1, u: "mL/hr", type: "WBT" },
+            { id: 504, floor: 5, q: "Order: Norepinephrine 0.05 mcg/kg/min. Pt: 100 kg. Supply: 8 mg / 250 mL. mL/hr?", a: 9.4, u: "mL/hr", type: "WBT" },
+            { id: 505, floor: 5, q: "Order: Epinephrine 0.1 mcg/kg/min. Pt: 85 kg. Supply: 4 mg / 250 mL. mL/hr?", a: 31.9, u: "mL/hr", type: "WBT" },
+            { id: 506, floor: 5, q: "Order: Nitroglycerin 50 mcg/min. Supply: 50 mg / 250 mL. mL/hr?", a: 15, u: "mL/hr", type: "WBT" },
+            { id: 507, floor: 5, q: "Order: Norepinephrine 0.2 mcg/kg/min. Pt: 90 kg. Supply: 4 mg / 250 mL. mL/hr?", a: 67.5, u: "mL/hr", type: "WBT" },
+            { id: 508, floor: 5, q: "Order: Epinephrine 0.2 mcg/kg/min. Pt: 70 kg. Supply: 4 mg / 250 mL. mL/hr?", a: 52.5, u: "mL/hr", type: "WBT" },
+            { id: 509, floor: 5, q: "Order: Nitroglycerin 100 mcg/min. Supply: 50 mg / 250 mL. mL/hr?", a: 30, u: "mL/hr", type: "WBT" },
+            { id: 510, floor: 5, q: "Order: Norepinephrine 12 mcg/min. Supply: 4 mg / 250 mL. mL/hr?", a: 45, u: "mL/hr", type: "WBT" },
+            { id: 511, floor: 5, q: "Order: Epinephrine 2 mcg/min. Supply: 4 mg / 250 mL. mL/hr?", a: 7.5, u: "mL/hr", type: "WBT" },
+            { id: 512, floor: 5, q: "Order: Nitroglycerin 5 mcg/min. Supply: 50 mg / 250 mL. mL/hr?", a: 1.5, u: "mL/hr", type: "WBT" },
+            { id: 513, floor: 5, q: "Order: Norepinephrine 0.15 mcg/kg/min. Pt: 60 kg. Supply: 4 mg / 250 mL. mL/hr?", a: 33.8, u: "mL/hr", type: "WBT" },
+            { id: 514, floor: 5, q: "Order: Epinephrine 0.02 mcg/kg/min. Pt: 110 kg. Supply: 4 mg / 250 mL. mL/hr?", a: 8.3, u: "mL/hr", type: "WBT" },
+            { id: 515, floor: 5, q: "Order: Nitroglycerin 20 mcg/min. Supply: 50 mg / 250 mL. mL/hr?", a: 6, u: "mL/hr", type: "WBT" },
+            { id: 516, floor: 5, q: "Order: Norepinephrine 8 mcg/min. Supply: 4 mg / 250 mL. mL/hr?", a: 30, u: "mL/hr", type: "WBT" },
+            { id: 517, floor: 5, q: "Order: Epinephrine 5 mcg/min. Supply: 4 mg / 250 mL. mL/hr?", a: 18.8, u: "mL/hr", type: "WBT" },
+            { id: 518, floor: 5, q: "Order: Nitroglycerin 150 mcg/min. Supply: 50 mg / 250 mL. mL/hr?", a: 45, u: "mL/hr", type: "WBT" },
+            { id: 519, floor: 5, q: "Order: Norepinephrine 0.02 mcg/kg/min. Pt: 75 kg. Supply: 4 mg / 250 mL. mL/hr?", a: 5.6, u: "mL/hr", type: "WBT" },
+            { id: 520, floor: 5, q: "Order: Epinephrine 0.15 mcg/kg/min. Pt: 90 kg. Supply: 4 mg / 250 mL. mL/hr?", a: 50.6, u: "mL/hr", type: "WBT" },
+            { id: 521, floor: 5, q: "Order: Nitroglycerin 40 mcg/min. Supply: 50 mg / 250 mL. mL/hr?", a: 12, u: "mL/hr", type: "WBT" },
+            { id: 522, floor: 5, q: "Order: Norepinephrine 0.3 mcg/kg/min. Pt: 80 kg. Supply: 8 mg / 250 mL. mL/hr?", a: 45, u: "mL/hr", type: "WBT" },
+            { id: 523, floor: 5, q: "Order: Epinephrine 0.08 mcg/kg/min. Pt: 65 kg. Supply: 4 mg / 250 mL. mL/hr?", a: 19.5, u: "mL/hr", type: "WBT" },
+            { id: 524, floor: 5, q: "Order: Nitroglycerin 200 mcg/min. Supply: 50 mg / 250 mL. mL/hr?", a: 60, u: "mL/hr", type: "WBT" },
+            { id: 525, floor: 5, q: "Order: Norepinephrine 20 mcg/min. Supply: 4 mg / 250 mL. mL/hr?", a: 75, u: "mL/hr", type: "WBT" }
         ];
 
         const FINALE_DATA = {
@@ -351,7 +457,7 @@
                 nclex: {
                     q: "What three concepts do you review prior to IV medication administration?",
                     options: ["Dilution, Correct Dose, Allerigies", "Compatibility, Dilution, Correct Medication", "Correct Medication, Order, and Supply", "Dilution, Compatability, and Rate of Administration"],
-                    a: 4
+                    a: 3
                 }
             },
             3: { 
@@ -359,7 +465,7 @@
                 nclex: {
                     q: "The nurse is reconstituting a powdered medication. What is the first priority?",
                     options: ["Read the label for the specific type and amount of diluent required", "Check the expiration date of the diluent", "Shake the vial vigorously for 2 minutes", "Draw up the powder into the syringe first"],
-                    a: 1
+                    a: 0
                 }
             },
             4: { 
@@ -367,15 +473,15 @@
                 nclex: {
                     q: "The nurse notes that an IV medication is incompatible with the primary IV fluid. What is the best action?",
                     options: ["Administer the medication anyway", "Start a new IV site", "Slow the rate of the primary fluid", "Hold the medication and notify the HCP"],
-                    a: 2
+                    a: 1
                 }
             },
-            6: { 
+            5: { 
                 q: "Order: Nitroprusside 0.5 mcg/kg/min. Patient: 70kg. Supply: 50mg/250mL. Set pump rate (mL/hr).", a: 10.5, u: "mL/hr",
                 nclex: {
                     q: "The nurse observes puffiness and leaking at the IV site. Which complication is occurring?",
                     options: ["Allergic reaction", "Infection", "Infiltration", "Thrombosis"],
-                    a: 3
+                    a: 2
                 }
             }
         };
@@ -417,25 +523,22 @@
             const criticalPath = findPath({x:1, y:1}, {x:SIZE_W-2, y:SIZE_H-2});
             state.gates = [];
             
-            // Mark Primary Gates on Critical Path
             let pathOptions = criticalPath.slice(2, -2).sort(() => Math.random() - 0.5);
             let placedCount = 0;
             for(let opt of pathOptions) {
                 if(placedCount >= 6) break;
-                // Ensure primary gates aren't too bunched together
                 if(state.gates.every(g => Math.abs(g.x-opt.x)+Math.abs(g.y-opt.y) >= 4)) {
-                    state.maze[opt.y][opt.x] = 2; // Primary Gate
+                    state.maze[opt.y][opt.x] = 2; 
                     state.gates.push({x: opt.x, y: opt.y, isPrimary: true});
                     placedCount++;
                 }
             }
 
-            // Distractor Gates (Off critical path)
             for(let y=1; y<SIZE_H-1; y++) {
                 for(let x=1; x<SIZE_W-1; x++) {
                     if(state.maze[y][x] === 0 && !criticalPath.some(p => p.x === x && p.y === y)) {
-                        if(Math.random() < 0.08) { // 8% chance to spawn distractor in empty hall
-                            state.maze[y][x] = 5; // Distractor Gate
+                        if(Math.random() < 0.08) {
+                            state.maze[y][x] = 5; 
                             state.gates.push({x, y, isPrimary: false});
                         }
                     }
@@ -460,14 +563,12 @@
                     else if (cell === 6) { ctx.fillStyle = "#eff6ff"; ctx.fillRect(px, py, TILE, TILE); ctx.fillStyle = "#2563eb"; ctx.fillRect(px+4, py+4, TILE-8, TILE-8); }
                     else { ctx.fillStyle = "white"; ctx.fillRect(px, py, TILE, TILE); }
                     
-                    // Gate Drawing (Primary or Distractor)
                     if(cell === 2 || cell === 5) {
                         ctx.fillStyle = "#f59e0b"; 
                         ctx.beginPath(); ctx.arc(px+TILE/2, py+TILE/2, TILE/3, 0, Math.PI*2); ctx.fill();
                         ctx.fillStyle = "white"; ctx.font = "bold 10px sans-serif"; ctx.textAlign = "center";
                         ctx.fillText("Rx", px+TILE/2, py+TILE/2+4);
                     }
-                    // Solved State
                     if(cell === 4) {
                         ctx.fillStyle = "#10b981";
                         ctx.beginPath(); ctx.arc(px+TILE/2, py+TILE/2, TILE/3, 0, Math.PI*2); ctx.fill();
@@ -503,7 +604,7 @@
 
         function openQuiz(x, y) {
             state.active = false; 
-            state.activeCell = {x, y, type: state.maze[y][x]}; // Store if primary (2) or distractor (5)
+            state.activeCell = {x, y, type: state.maze[y][x]};
             let pool = BANK.filter(q => q.floor === state.level);
             let unused = pool.filter(q => !state.usedQuestionIds.has(q.id));
             if(unused.length === 0) { state.usedQuestionIds.clear(); unused = pool; }
@@ -522,11 +623,8 @@
             const val = parseFloat(document.getElementById('q-input').value);
             const feedback = document.getElementById('q-feedback');
             if(isNaN(val)) return;
-            if(Math.abs(val - state.currentQ.a) < 0.01) {
-                // Only increment solved count for Primary Gates
-                if(state.activeCell.type === 2) {
-                    state.solved++;
-                }
+            if(Math.abs(val - state.currentQ.a) <= 0.11) {
+                if(state.activeCell.type === 2) state.solved++;
                 state.maze[state.activeCell.y][state.activeCell.x] = 4;
                 state.active = true;
                 document.getElementById('quiz-overlay').classList.remove('active'); 
@@ -543,50 +641,30 @@
             const data = FINALE_DATA[state.level];
             state.targetValue = data.a;
             state.currentValue = 0;
-            
             document.getElementById('finale-math-q').innerText = data.q;
             const container = document.getElementById('interactive-container');
             container.innerHTML = "";
             
             if(state.level <= 2) {
-                // DOSAGE CUP
                 document.getElementById('finale-tag').innerText = "Oral Administration";
                 container.innerHTML = `
                     <div id="draw-label" class="mb-4 bg-slate-900 text-white px-4 py-1 rounded-full font-bold text-sm">0 mL</div>
-                    <div class="device-cup cursor-pointer" id="cup-device">
-                        <div id="cup-liquid" class="liquid" style="height: 0%"></div>
-                    </div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase mt-4">Click and hold to pour</p>
-                `;
+                    <div class="device-cup cursor-pointer" id="cup-device"><div id="cup-liquid" class="liquid" style="height: 0%"></div></div>`;
                 setupCupLogic();
-            } else if(state.level === 3) {
-                // SYRINGE
-                document.getElementById('finale-tag').innerText = "IV Push Admin";
-                container.innerHTML = `
-                    <div id="draw-label" class="mb-4 bg-slate-900 text-white px-4 py-1 rounded-full font-bold text-sm">0.0 mL</div>
-                    <div id="syringe-container" class="h-16 w-64 bg-white border-2 border-slate-300 rounded-r-[40px] relative overflow-hidden cursor-ew-resize">
-                        <div id="plunger" class="absolute inset-y-0 left-0 bg-blue-500/30 border-r-4 border-blue-600 w-0"></div>
-                    </div>
-                `;
-                setupSyringeLogic();
             } else {
-                // IV PUMP
-                document.getElementById('finale-tag').innerText = "IV Infusion System";
+                document.getElementById('finale-tag').innerText = state.level === 4 ? "Gravity Drip Setup" : "IV Infusion System";
                 container.innerHTML = `
                     <div class="pump-screen w-full max-w-xs text-center">
-                        <div class="text-[10px] text-slate-400 mb-2">INFUSION RATE SETTING</div>
                         <div id="pump-val" class="text-4xl font-bold mb-2">0.0</div>
-                        <div class="text-[10px] text-slate-400">mL / hr</div>
+                        <div class="text-[10px] text-slate-400">${state.level === 4 ? 'gtt / min' : 'mL / hr'}</div>
                     </div>
                     <div class="flex gap-4 mt-6">
                         <button onclick="adjustPump(-10)" class="bg-slate-200 p-3 rounded-lg font-bold">-10</button>
                         <button onclick="adjustPump(-1)" class="bg-slate-200 p-3 rounded-lg font-bold">-1</button>
                         <button onclick="adjustPump(1)" class="bg-blue-600 text-white p-3 rounded-lg font-bold">+1</button>
                         <button onclick="adjustPump(10)" class="bg-blue-600 text-white p-3 rounded-lg font-bold">+10</button>
-                    </div>
-                `;
+                    </div>`;
             }
-
             document.getElementById('finale-modal').classList.remove('hidden');
             document.getElementById('finale-modal').style.display = 'flex';
             document.getElementById('finale-stage-1').classList.remove('hidden');
@@ -599,7 +677,6 @@
             const label = document.getElementById('draw-label');
             let pouring = false;
             let timer;
-
             const pour = () => {
                 if(!pouring) return;
                 state.currentValue = Math.min(60, state.currentValue + 1);
@@ -607,29 +684,8 @@
                 label.innerText = state.currentValue + " mL";
                 timer = setTimeout(pour, 50);
             };
-
             cup.onmousedown = () => { pouring = true; pour(); };
             window.onmouseup = () => { pouring = false; clearTimeout(timer); };
-        }
-
-        function setupSyringeLogic() {
-            const syr = document.getElementById('syringe-container');
-            const plu = document.getElementById('plunger');
-            const label = document.getElementById('draw-label');
-            const update = (e) => {
-                const rect = syr.getBoundingClientRect();
-                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-                const pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
-                plu.style.width = pct + "%";
-                state.currentValue = (pct / 10).toFixed(1);
-                label.innerText = state.currentValue + " mL";
-            };
-            syr.onmousedown = (e) => {
-                update(e);
-                const track = (me) => update(me);
-                window.addEventListener('mousemove', track);
-                window.addEventListener('mouseup', () => window.removeEventListener('mousemove', track), {once:true});
-            };
         }
 
         function adjustPump(amt) {
@@ -638,10 +694,9 @@
         }
 
         function checkFinalStage1() {
-            const tolerance = state.level <= 2 ? 2 : 0.2;
-            if(Math.abs(state.currentValue - state.targetValue) <= tolerance) {
-                showNclex();
-            } else {
+            const tolerance = state.level <= 2 ? 2 : 0.5;
+            if(Math.abs(state.currentValue - state.targetValue) <= tolerance) showNclex();
+            else {
                 document.getElementById('finale-stage-1').classList.add('shake');
                 setTimeout(() => document.getElementById('finale-stage-1').classList.remove('shake'), 500);
             }
@@ -676,9 +731,7 @@
             if(state.selectedNclexIdx === data.a) {
                 document.getElementById('finale-modal').style.display = 'none';
                 state.level++; 
-                if(state.level === 5) state.level = 6; 
-                initMaze(); 
-                state.active = true;
+                initMaze(); state.active = true;
             } else {
                 feedback.innerText = "INCORRECT CLINICAL CHOICE";
                 feedback.className = "text-center text-xs font-bold uppercase mb-4 h-4 text-red-500";
@@ -716,20 +769,11 @@
                         <div class="w-4 h-4 rounded-full border-2 ${active ? 'bg-blue-600 border-blue-600' : 'border-slate-200'} flex items-center justify-center">
                             ${active ? '<div class="w-1.5 h-1.5 bg-white rounded-full"></div>' : ''}
                         </div>
-                        Order Verification #${i}
-                    </div>
-                `;
+                        Order #${i}
+                    </div>`;
             }
             const guideList = document.getElementById('guideline-list');
-            let floorDesc = "Complete the medication orders for this floor.";
-            switch(state.level) {
-                case 1: floorDesc = "Floor Focus: PO, SQ, and IM doses."; break;
-                case 2: floorDesc = "Floor Focus: IV Push (IVP) calculations."; break;
-                case 3: floorDesc = "Floor Focus: IV Infusion (mL/hr) calculations."; break;
-                case 4: floorDesc = "Floor Focus: IV Drip Rates (gtt/min) calculations."; break;
-                case 5: floorDesc = "Floor Focus: Weight-based (per kg) IV calculations."; break;
-            }
-            guideList.innerHTML = `<li class="flex gap-2"><span>•</span><span>${floorDesc}</span></li><li class="flex gap-2"><span>•</span><span>Identify the 6 primary gates to unlock the Med Room.</span></li>`;
+            guideList.innerHTML = `<li class="flex gap-2"><span>•</span><span>Complete 6 order verifications to unlock the Med Room.</span></li>`;
         }
 
         window.onkeydown = (e) => {
@@ -738,7 +782,6 @@
             if(e.key === 'ArrowLeft') move(-1,0);
             if(e.key === 'ArrowRight') move(1,0);
         };
-
         initMaze();
     </script>
 </body>
