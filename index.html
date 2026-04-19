@@ -137,6 +137,35 @@
             30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
             40%, 60% { transform: translate3d(4px, 0, 0); }
         }
+
+        /* Device Specific Styles */
+        .device-cup {
+            width: 120px;
+            height: 140px;
+            background: rgba(255,255,255,0.2);
+            border: 4px solid #fff;
+            border-top: none;
+            border-radius: 0 0 20px 20px;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        .liquid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(59, 130, 246, 0.6);
+            transition: height 0.1s;
+        }
+        .pump-screen {
+            background: #0f172a;
+            border: 8px solid #334155;
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #10b981;
+        }
     </style>
 </head>
 <body>
@@ -220,7 +249,7 @@
 
             <div class="flex-1">
                 <div class="flex justify-between items-end mb-4">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order Verification Tasks</h3>
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Primary Gate Status</h3>
                     <span id="progress-val" class="text-xs font-bold text-blue-600">0 / 6 Complete</span>
                 </div>
                 <div id="checklist-container"></div>
@@ -231,24 +260,43 @@
                 <ul id="guideline-list" class="text-[11px] text-blue-700 font-bold leading-relaxed space-y-2">
                     <li class="flex gap-2">
                         <span>•</span>
-                        <span>Navigate to each yellow station on the critical path to verify medication orders.</span>
+                        <span>Unlock 6 PRIMARY gates (on the critical path) to enter the Med Room. Distractor gates provide practice but don't count toward the total.</span>
                     </li>
                 </ul>
             </div>
         </aside>
     </div>
 
-    <div id="finale-modal" class="fixed inset-0 bg-slate-900/95 z-[200] hidden items-center justify-center p-6">
-        <div class="bg-white rounded-[32px] p-10 max-w-2xl w-full">
-            <h2 class="text-2xl font-black mb-2 text-slate-900">Med Room: Final Verification</h2>
-            <p id="finale-math-q" class="text-slate-600 mb-8 font-semibold text-lg"></p>
-            <div class="bg-slate-100 rounded-2xl p-10 mb-8 relative border-2 border-slate-200">
-                <div id="draw-label" class="absolute top-4 right-4 bg-slate-900 text-white px-4 py-1 rounded-full font-bold text-sm">0.0 mL</div>
-                <div id="syringe-container" class="h-20 w-full bg-white border-2 border-slate-300 rounded-r-[40px] relative overflow-hidden cursor-ew-resize">
-                    <div id="plunger" class="absolute inset-y-0 left-0 bg-blue-500/30 border-r-4 border-blue-600 w-0"></div>
-                </div>
+    <!-- REFINED FINALE MODAL -->
+    <div id="finale-modal" class="fixed inset-0 bg-slate-900/95 z-[200] hidden items-center justify-center p-6 overflow-y-auto">
+        <div id="finale-stage-1" class="bg-white rounded-[32px] p-10 max-w-2xl w-full">
+            <div class="flex items-center gap-3 mb-4">
+                <span id="finale-tag" class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-[10px] font-black uppercase">Device Setup</span>
             </div>
-            <button onclick="checkFinal()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold text-sm uppercase tracking-widest hover:shadow-lg transition-all">Submit Precision Check</button>
+            <h2 class="text-2xl font-black mb-2 text-slate-900">Med Room: Clinical Challenge</h2>
+            <p id="finale-math-q" class="text-slate-600 mb-8 font-semibold text-lg"></p>
+            
+            <!-- Interactive Area Container -->
+            <div id="interactive-container" class="bg-slate-100 rounded-2xl p-10 mb-8 relative border-2 border-slate-200 flex flex-col items-center justify-center min-h-[200px]">
+                <!-- Interactive elements injected here by JS -->
+            </div>
+            
+            <button onclick="checkFinalStage1()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold text-sm uppercase tracking-widest hover:shadow-lg transition-all">Verify Setup</button>
+        </div>
+
+        <div id="finale-stage-2" class="bg-white rounded-[32px] p-10 max-w-2xl w-full hidden">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-[10px] font-black uppercase">Clinical Judgement</span>
+            </div>
+            <h2 class="text-2xl font-black mb-2 text-slate-900">NCLEX Critical Thinking</h2>
+            <p id="nclex-q-text" class="text-slate-600 mb-8 font-semibold text-lg leading-snug"></p>
+            
+            <div id="nclex-options" class="grid gap-3 mb-8">
+                <!-- Options injected by JS -->
+            </div>
+            
+            <p id="nclex-feedback" class="text-center text-xs font-bold uppercase mb-4 h-4"></p>
+            <button id="nclex-submit" onclick="checkFinalStage2()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold text-sm uppercase tracking-widest">Submit Answer</button>
         </div>
     </div>
 
@@ -263,43 +311,74 @@
         let state = {
             level: 1, maze: [], player: {x:1, y:1}, solved: 0,
             calcStr: "0", calcHist: "", active: true,
-            currentQ: null, targetDose: 0, drawDose: 0,
-            gates: [], activeCell: null
+            currentQ: null, targetValue: 0, currentValue: 0,
+            gates: [], activeCell: null,
+            usedQuestionIds: new Set(),
+            selectedNclexIdx: -1
         };
 
         const BANK = [
-            // Floor 1: PO, SQ, IM
-            { floor: 1, q: "Order: Metoprolol 25 mg PO. Supply: 50 mg tablets. How many tabs?", a: 0.5, u: "TABS", type: "PO" },
-            { floor: 1, q: "Order: Heparin 5,000 Units SQ. Supply: 10,000 Units/mL. How many mL?", a: 0.5, u: "mL", type: "SQ" },
-            { floor: 1, q: "Order: Epinephrine 0.3 mg IM. Supply: 1 mg/mL. How many mL?", a: 0.3, u: "mL", type: "IM" },
-            { floor: 1, q: "Order: Prednisone 10 mg PO. Supply: 5 mg tablets. How many tabs?", a: 2, u: "TABS", type: "PO" },
-            { floor: 1, q: "Order: Amoxicillin 500 mg PO. Supply: 250 mg/5 mL. How many mL?", a: 10, u: "mL", type: "PO" },
-            
-            // Floor 2: IV Push
-            { floor: 2, q: "Order: Digoxin 0.125 mg IV Push. Supply: 0.25 mg/mL. How many mL?", a: 0.5, u: "mL", type: "IVP" },
-            { floor: 2, q: "Order: Morphine 4 mg IV Push. Supply: 10 mg/mL. How many mL?", a: 0.4, u: "mL", type: "IVP" },
-            { floor: 2, q: "Order: Furosemide 40 mg IV Push. Supply: 10 mg/mL. How many mL?", a: 4, u: "mL", type: "IVP" },
-            { floor: 2, q: "Order: Hydromorphone 0.5 mg IV Push. Supply: 2 mg/mL. How many mL?", a: 0.25, u: "mL", type: "IVP" },
-            { floor: 2, q: "Order: Ondansetron 4 mg IV Push. Supply: 2 mg/mL. How many mL?", a: 2, u: "mL", type: "IVP" },
-
-            // Floor 3: IV mL/hr
-            { floor: 3, q: "Order: 1,000 mL NS to infuse over 8 hours. What is the mL/hr rate?", a: 125, u: "mL/hr", type: "INF" },
-            { floor: 3, q: "Order: 500 mL D5W to infuse over 4 hours. What is the mL/hr rate?", a: 125, u: "mL/hr", type: "INF" },
-            { floor: 3, q: "Order: Vancomycin 1g in 250 mL NS to infuse over 2 hours. What is the mL/hr rate?", a: 125, u: "mL/hr", type: "INF" },
-            { floor: 3, q: "Order: Ciprofloxacin 400mg in 200 mL to infuse over 60 min. What is the mL/hr rate?", a: 200, u: "mL/hr", type: "INF" },
-
-            // Floor 4: IV gtt/min
-            { floor: 4, q: "Order: 100 mL NS over 30 min. Tubing drop factor: 15 gtt/mL. Calculate gtt/min.", a: 50, u: "gtt/min", type: "DRIP" },
-            { floor: 4, q: "Order: 1,000 mL LR over 10 hours. Drop factor: 10 gtt/mL. Calculate gtt/min.", a: 17, u: "gtt/min", type: "DRIP" },
-            { floor: 4, q: "Order: 50 mL antibiotic over 20 min. Drop factor: 60 gtt/mL (microdrip). Calculate gtt/min.", a: 150, u: "gtt/min", type: "DRIP" },
-            { floor: 4, q: "Order: 250 mL NS over 2 hours. Drop factor: 20 gtt/mL. Calculate gtt/min.", a: 42, u: "gtt/min", type: "DRIP" },
-
-            // Floor 6: IV per kg
-            { floor: 6, q: "Order: Dopamine 5 mcg/kg/min. Patient weight: 80 kg. Supply: 400 mg/250 mL. What is the mcg/min dose?", a: 400, u: "mcg/min", type: "WBT" },
-            { floor: 6, q: "Order: Heparin 18 units/kg/hr. Patient weight: 70 kg. Supply: 25,000 units/500 mL. Calculate units/hr.", a: 1260, u: "units/hr", type: "WBT" },
-            { floor: 6, q: "Order: Propofol 10 mcg/kg/min. Patient weight: 100 kg. What is the mcg/min dose?", a: 1000, u: "mcg/min", type: "WBT" },
-            { floor: 6, q: "Order: Dobutamine 2.5 mcg/kg/min. Patient weight: 60 kg. What is the mcg/min dose?", a: 150, u: "mcg/min", type: "WBT" }
+            { id: 101, floor: 1, q: "Order: Metoprolol 25 mg PO. Supply: 50 mg tablets. How many tabs?", a: 0.5, u: "TABS", type: "PO" },
+            { id: 102, floor: 1, q: "Order: Heparin 5,000 Units SQ. Supply: 10,000 Units/mL. How many mL?", a: 0.5, u: "mL", type: "SQ" },
+            { id: 103, floor: 1, q: "Order: Epinephrine 0.3 mg IM. Supply: 1 mg/mL. How many mL?", a: 0.3, u: "mL", type: "IM" },
+            { id: 104, floor: 1, q: "Order: Prednisone 10 mg PO. Supply: 5 mg tablets. How many tabs?", a: 2, u: "TABS", type: "PO" },
+            { id: 105, floor: 1, q: "Order: Amoxicillin 500 mg PO. Supply: 250 mg/5 mL. How many mL?", a: 10, u: "mL", type: "PO" },
+            { id: 106, floor: 1, q: "Order: Digoxin 0.125 mg PO. Supply: 0.25 mg tablets. How many tabs?", a: 0.5, u: "TABS", type: "PO" },
+            { id: 201, floor: 2, q: "Order: Digoxin 0.125 mg IV Push. Supply: 0.25 mg/mL. How many mL?", a: 0.5, u: "mL", type: "IVP" },
+            { id: 202, floor: 2, q: "Order: Morphine 4 mg IV Push. Supply: 10 mg/mL. How many mL?", a: 0.4, u: "mL", type: "IVP" },
+            { id: 203, floor: 2, q: "Order: Furosemide 40 mg IV Push. Supply: 10 mg/mL. How many mL?", a: 4, u: "mL", type: "IVP" },
+            { id: 204, floor: 2, q: "Order: Hydromorphone 0.5 mg IV Push. Supply: 2 mg/mL. How many mL?", a: 0.25, u: "mL", type: "IVP" },
+            { id: 301, floor: 3, q: "Order: 1,000 mL NS to infuse over 8 hours. What is the mL/hr rate?", a: 125, u: "mL/hr", type: "INF" },
+            { id: 302, floor: 3, q: "Order: 500 mL D5W to infuse over 4 hours. What is the mL/hr rate?", a: 125, u: "mL/hr", type: "INF" },
+            { id: 306, floor: 3, q: "Order: Heparin 1,000 units/hr. Supply: 25,000 units in 500 mL NS. Calculate mL/hr.", a: 20, u: "mL/hr", type: "INF" },
+            { id: 401, floor: 4, q: "Order: 100 mL NS over 30 min. Tubing drop factor: 15 gtt/mL. Calculate gtt/min.", a: 50, u: "gtt/min", type: "DRIP" },
+            { id: 402, floor: 4, q: "Order: 1,000 mL LR over 10 hours. Drop factor: 10 gtt/mL. Calculate gtt/min.", a: 17, u: "gtt/min", type: "DRIP" },
+            { id: 601, floor: 5, q: "Order: Dopamine 5 mcg/kg/min. Patient weight: 80 kg. What is the mcg/min dose?", a: 400, u: "mcg/min", type: "WBT" },
+            { id: 602, floor: 5, q: "Order: Heparin 18 units/kg/hr. Patient weight: 70 kg. Calculate units/hr.", a: 1260, u: "units/hr", type: "WBT" }
         ];
+
+        const FINALE_DATA = {
+            1: { 
+                q: "Order: Lactulose 30 g PO. Supply: 10 g / 15 mL. How many mL do you pour into the dosage cup?", a: 45, u: "mL", 
+                nclex: {
+                    q: "Which patient is at highest risk for aspiration during oral medication administration?",
+                    options: ["A patient receiving continuous tube feed", "A patient who was asleep but aroused easily", "A patient with left-sided weakness following a stroke", "A patient who requires a soft, bland diet order"],
+                    a: 2
+                }
+            },
+            2: { 
+                q: "Order: Morphine 2 mg IV every 4 hours as needed. Supply: 10 mg / 5 mL. How much do you draw into the syringe?", a: 1, u: "mL",
+                nclex: {
+                    q: "What three concepts do you review prior to IV medication administration?",
+                    options: ["Dilution, Correct Dose, Allerigies", "Compatibility, Dilution, Correct Medication", "Correct Medication, Order, and Supply", "Dilution, Compatability, and Rate of Administration"],
+                    a: 4
+                }
+            },
+            3: { 
+                q: "Order: Ceftriaxone 500 mg IV Push. Reconstituted supply: 250 mg / 1 mL. How much do you draw into the syringe?", a: 2, u: "mL",
+                nclex: {
+                    q: "The nurse is reconstituting a powdered medication. What is the first priority?",
+                    options: ["Read the label for the specific type and amount of diluent required", "Check the expiration date of the diluent", "Shake the vial vigorously for 2 minutes", "Draw up the powder into the syringe first"],
+                    a: 1
+                }
+            },
+            4: { 
+                q: "Order: NS 1,000 mL at 125 mL/hr. Set the IV Pump rate.", a: 125, u: "mL/hr",
+                nclex: {
+                    q: "The nurse notes that an IV medication is incompatible with the primary IV fluid. What is the best action?",
+                    options: ["Administer the medication anyway", "Start a new IV site", "Slow the rate of the primary fluid", "Hold the medication and notify the HCP"],
+                    a: 2
+                }
+            },
+            6: { 
+                q: "Order: Nitroprusside 0.5 mcg/kg/min. Patient: 70kg. Supply: 50mg/250mL. Set pump rate (mL/hr).", a: 10.5, u: "mL/hr",
+                nclex: {
+                    q: "The nurse observes puffiness and leaking at the IV site. Which complication is occurring?",
+                    options: ["Allergic reaction", "Infection", "Infiltration", "Thrombosis"],
+                    a: 3
+                }
+            }
+        };
 
         function findPath(start, end) {
             let queue = [[start]];
@@ -337,39 +416,37 @@
 
             const criticalPath = findPath({x:1, y:1}, {x:SIZE_W-2, y:SIZE_H-2});
             state.gates = [];
-
+            
+            // Mark Primary Gates on Critical Path
             let pathOptions = criticalPath.slice(2, -2).sort(() => Math.random() - 0.5);
             let placedCount = 0;
             for(let opt of pathOptions) {
                 if(placedCount >= 6) break;
+                // Ensure primary gates aren't too bunched together
                 if(state.gates.every(g => Math.abs(g.x-opt.x)+Math.abs(g.y-opt.y) >= 4)) {
-                    state.maze[opt.y][opt.x] = 2; 
-                    state.gates.push(opt);
+                    state.maze[opt.y][opt.x] = 2; // Primary Gate
+                    state.gates.push({x: opt.x, y: opt.y, isPrimary: true});
                     placedCount++;
                 }
             }
 
-            let pathSet = new Set(criticalPath.map(p => `${p.x},${p.y}`));
-            let offPathOptions = [];
-            for(let y=0; y<SIZE_H; y++) {
-                for(let x=0; x<SIZE_W; x++) {
-                    if(state.maze[y][x] === 0 && !pathSet.has(`${x},${y}`)) offPathOptions.push({x, y});
-                }
-            }
-            offPathOptions.sort(() => Math.random() - 0.5);
-            let distractorCount = 0;
-            for(let opt of offPathOptions) {
-                if(distractorCount >= 4) break;
-                if(state.gates.every(g => Math.abs(g.x-opt.x)+Math.abs(g.y-opt.y) >= 4)) {
-                    state.maze[opt.y][opt.x] = 5; 
-                    state.gates.push(opt);
-                    distractorCount++;
+            // Distractor Gates (Off critical path)
+            for(let y=1; y<SIZE_H-1; y++) {
+                for(let x=1; x<SIZE_W-1; x++) {
+                    if(state.maze[y][x] === 0 && !criticalPath.some(p => p.x === x && p.y === y)) {
+                        if(Math.random() < 0.08) { // 8% chance to spawn distractor in empty hall
+                            state.maze[y][x] = 5; // Distractor Gate
+                            state.gates.push({x, y, isPrimary: false});
+                        }
+                    }
                 }
             }
 
             state.maze[SIZE_H-2][SIZE_W-2] = 3; 
             state.maze[1][1] = 6; 
-            state.solved = 0; state.player = {x:1, y:1};
+            state.solved = 0; 
+            state.player = {x:1, y:1};
+            state.usedQuestionIds.clear();
             updateUI(); draw();
         }
 
@@ -379,22 +456,18 @@
                 for(let x=0; x<SIZE_W; x++) {
                     const cell = state.maze[y][x];
                     const px = x*TILE; const py = y*TILE;
-
-                    if(cell === 1) { 
-                        ctx.fillStyle = "#cbd5e1"; ctx.fillRect(px, py, TILE, TILE); 
-                    } else if (cell === 6) {
-                        ctx.fillStyle = "#eff6ff"; ctx.fillRect(px, py, TILE, TILE);
-                        ctx.fillStyle = "#2563eb"; ctx.fillRect(px + 4, py + 4, TILE - 8, TILE - 8);
-                    } else {
-                        ctx.fillStyle = "white"; ctx.fillRect(px, py, TILE, TILE);
-                    }
-
+                    if(cell === 1) { ctx.fillStyle = "#cbd5e1"; ctx.fillRect(px, py, TILE, TILE); }
+                    else if (cell === 6) { ctx.fillStyle = "#eff6ff"; ctx.fillRect(px, py, TILE, TILE); ctx.fillStyle = "#2563eb"; ctx.fillRect(px+4, py+4, TILE-8, TILE-8); }
+                    else { ctx.fillStyle = "white"; ctx.fillRect(px, py, TILE, TILE); }
+                    
+                    // Gate Drawing (Primary or Distractor)
                     if(cell === 2 || cell === 5) {
                         ctx.fillStyle = "#f59e0b"; 
                         ctx.beginPath(); ctx.arc(px+TILE/2, py+TILE/2, TILE/3, 0, Math.PI*2); ctx.fill();
                         ctx.fillStyle = "white"; ctx.font = "bold 10px sans-serif"; ctx.textAlign = "center";
                         ctx.fillText("Rx", px+TILE/2, py+TILE/2+4);
                     }
+                    // Solved State
                     if(cell === 4) {
                         ctx.fillStyle = "#10b981";
                         ctx.beginPath(); ctx.arc(px+TILE/2, py+TILE/2, TILE/3, 0, Math.PI*2); ctx.fill();
@@ -422,24 +495,21 @@
             if(nx>=0 && nx<SIZE_W && ny>=0 && ny<SIZE_H && state.maze[ny][nx] !== 1) {
                 if(state.maze[ny][nx] === 3 && state.solved < 6) return;
                 state.player = {x:nx, y:ny};
-                if(state.maze[ny][nx] === 2 || state.maze[ny][nx] === 5) openQuiz(nx, ny, state.maze[ny][nx]);
+                if(state.maze[ny][nx] === 2 || state.maze[ny][nx] === 5) openQuiz(nx, ny);
                 if(state.maze[ny][nx] === 3) openFinale();
             }
             draw();
         }
 
-        function openQuiz(x, y, type) {
+        function openQuiz(x, y) {
             state.active = false; 
-            state.activeCell = {x, y, type};
-            
-            // Filter bank based on current level rules
-            let possibleQs = BANK.filter(q => q.floor === state.level);
-            // Fallback for Floor 5 (Mixed) or if no specific floor rules exist
-            if(possibleQs.length === 0) possibleQs = BANK;
-
-            state.currentQ = possibleQs[Math.floor(Math.random()*possibleQs.length)];
-            
-            document.getElementById('q-category').innerText = `Verification: ${state.currentQ.type}`;
+            state.activeCell = {x, y, type: state.maze[y][x]}; // Store if primary (2) or distractor (5)
+            let pool = BANK.filter(q => q.floor === state.level);
+            let unused = pool.filter(q => !state.usedQuestionIds.has(q.id));
+            if(unused.length === 0) { state.usedQuestionIds.clear(); unused = pool; }
+            state.currentQ = unused[Math.floor(Math.random()*unused.length)];
+            state.usedQuestionIds.add(state.currentQ.id);
+            document.getElementById('q-category').innerText = `Verification: ${state.currentQ.type} ${state.activeCell.type === 5 ? '(PRACTICE)' : ''}`;
             document.getElementById('q-text').innerText = state.currentQ.q;
             document.getElementById('q-unit').innerText = state.currentQ.u;
             document.getElementById('q-input').value = "";
@@ -451,67 +521,169 @@
         function submitQuiz() {
             const val = parseFloat(document.getElementById('q-input').value);
             const feedback = document.getElementById('q-feedback');
-            const card = document.getElementById('quiz-card');
-            
-            if(isNaN(val)) {
-                feedback.innerText = "ENTER A VALUE";
-                feedback.className = "mt-4 text-center text-[10px] font-bold uppercase h-4 text-red-500";
-                return;
-            }
-
-            // Margin of error for rounding differences
-            if(Math.abs(val - state.currentQ.a) < 1.01) {
+            if(isNaN(val)) return;
+            if(Math.abs(val - state.currentQ.a) < 0.01) {
+                // Only increment solved count for Primary Gates
                 if(state.activeCell.type === 2) {
                     state.solved++;
                 }
                 state.maze[state.activeCell.y][state.activeCell.x] = 4;
-                closeQuiz(); 
-                updateUI(); 
-                draw();
+                state.active = true;
+                document.getElementById('quiz-overlay').classList.remove('active'); 
+                updateUI(); draw();
             } else {
                 feedback.innerText = "INCORRECT DOSAGE";
-                feedback.className = "mt-4 text-center text-[10px] font-bold uppercase h-4 text-red-500";
-                card.classList.add('shake');
-                setTimeout(() => card.classList.remove('shake'), 500);
+                document.getElementById('quiz-card').classList.add('shake');
+                setTimeout(() => document.getElementById('quiz-card').classList.remove('shake'), 500);
             }
-        }
-
-        function closeQuiz() { 
-            state.active = true; 
-            document.getElementById('quiz-overlay').classList.remove('active'); 
         }
 
         function openFinale() {
             state.active = false;
-            state.targetDose = (Math.random() * 8 + 1).toFixed(1);
-            document.getElementById('finale-math-q').innerText = `Med Room Access Task: Draw exactly ${state.targetDose} mL into the syringe.`;
+            const data = FINALE_DATA[state.level];
+            state.targetValue = data.a;
+            state.currentValue = 0;
+            
+            document.getElementById('finale-math-q').innerText = data.q;
+            const container = document.getElementById('interactive-container');
+            container.innerHTML = "";
+            
+            if(state.level <= 2) {
+                // DOSAGE CUP
+                document.getElementById('finale-tag').innerText = "Oral Administration";
+                container.innerHTML = `
+                    <div id="draw-label" class="mb-4 bg-slate-900 text-white px-4 py-1 rounded-full font-bold text-sm">0 mL</div>
+                    <div class="device-cup cursor-pointer" id="cup-device">
+                        <div id="cup-liquid" class="liquid" style="height: 0%"></div>
+                    </div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mt-4">Click and hold to pour</p>
+                `;
+                setupCupLogic();
+            } else if(state.level === 3) {
+                // SYRINGE
+                document.getElementById('finale-tag').innerText = "IV Push Admin";
+                container.innerHTML = `
+                    <div id="draw-label" class="mb-4 bg-slate-900 text-white px-4 py-1 rounded-full font-bold text-sm">0.0 mL</div>
+                    <div id="syringe-container" class="h-16 w-64 bg-white border-2 border-slate-300 rounded-r-[40px] relative overflow-hidden cursor-ew-resize">
+                        <div id="plunger" class="absolute inset-y-0 left-0 bg-blue-500/30 border-r-4 border-blue-600 w-0"></div>
+                    </div>
+                `;
+                setupSyringeLogic();
+            } else {
+                // IV PUMP
+                document.getElementById('finale-tag').innerText = "IV Infusion System";
+                container.innerHTML = `
+                    <div class="pump-screen w-full max-w-xs text-center">
+                        <div class="text-[10px] text-slate-400 mb-2">INFUSION RATE SETTING</div>
+                        <div id="pump-val" class="text-4xl font-bold mb-2">0.0</div>
+                        <div class="text-[10px] text-slate-400">mL / hr</div>
+                    </div>
+                    <div class="flex gap-4 mt-6">
+                        <button onclick="adjustPump(-10)" class="bg-slate-200 p-3 rounded-lg font-bold">-10</button>
+                        <button onclick="adjustPump(-1)" class="bg-slate-200 p-3 rounded-lg font-bold">-1</button>
+                        <button onclick="adjustPump(1)" class="bg-blue-600 text-white p-3 rounded-lg font-bold">+1</button>
+                        <button onclick="adjustPump(10)" class="bg-blue-600 text-white p-3 rounded-lg font-bold">+10</button>
+                    </div>
+                `;
+            }
+
+            document.getElementById('finale-modal').classList.remove('hidden');
             document.getElementById('finale-modal').style.display = 'flex';
-            const syringe = document.getElementById('syringe-container');
-            const plunger = document.getElementById('plunger');
-            const label = document.getElementById('draw-label');
-            const update = (e) => {
-                const rect = syringe.getBoundingClientRect();
-                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-                const pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
-                plunger.style.width = pct + "%";
-                state.drawDose = (pct / 10).toFixed(1);
-                label.innerText = state.drawDose + " mL";
-            };
-            const track = (e) => {
-                update(e);
-                const stop = () => { window.removeEventListener('mousemove', update); window.removeEventListener('touchmove', update); };
-                window.addEventListener('mousemove', update);
-                window.addEventListener('touchmove', update);
-                window.addEventListener('mouseup', stop, {once:true});
-                window.addEventListener('touchend', stop, {once:true});
-            };
-            syringe.onmousedown = track; syringe.ontouchstart = track;
+            document.getElementById('finale-stage-1').classList.remove('hidden');
+            document.getElementById('finale-stage-2').classList.add('hidden');
         }
 
-        function checkFinal() {
-            if(Math.abs(state.drawDose - state.targetDose) < 0.2) {
+        function setupCupLogic() {
+            const cup = document.getElementById('cup-device');
+            const liq = document.getElementById('cup-liquid');
+            const label = document.getElementById('draw-label');
+            let pouring = false;
+            let timer;
+
+            const pour = () => {
+                if(!pouring) return;
+                state.currentValue = Math.min(60, state.currentValue + 1);
+                liq.style.height = (state.currentValue / 60 * 100) + "%";
+                label.innerText = state.currentValue + " mL";
+                timer = setTimeout(pour, 50);
+            };
+
+            cup.onmousedown = () => { pouring = true; pour(); };
+            window.onmouseup = () => { pouring = false; clearTimeout(timer); };
+        }
+
+        function setupSyringeLogic() {
+            const syr = document.getElementById('syringe-container');
+            const plu = document.getElementById('plunger');
+            const label = document.getElementById('draw-label');
+            const update = (e) => {
+                const rect = syr.getBoundingClientRect();
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                const pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
+                plu.style.width = pct + "%";
+                state.currentValue = (pct / 10).toFixed(1);
+                label.innerText = state.currentValue + " mL";
+            };
+            syr.onmousedown = (e) => {
+                update(e);
+                const track = (me) => update(me);
+                window.addEventListener('mousemove', track);
+                window.addEventListener('mouseup', () => window.removeEventListener('mousemove', track), {once:true});
+            };
+        }
+
+        function adjustPump(amt) {
+            state.currentValue = Math.max(0, parseFloat((state.currentValue + amt).toFixed(1)));
+            document.getElementById('pump-val').innerText = state.currentValue;
+        }
+
+        function checkFinalStage1() {
+            const tolerance = state.level <= 2 ? 2 : 0.2;
+            if(Math.abs(state.currentValue - state.targetValue) <= tolerance) {
+                showNclex();
+            } else {
+                document.getElementById('finale-stage-1').classList.add('shake');
+                setTimeout(() => document.getElementById('finale-stage-1').classList.remove('shake'), 500);
+            }
+        }
+
+        function showNclex() {
+            const data = FINALE_DATA[state.level].nclex;
+            state.selectedNclexIdx = -1;
+            document.getElementById('nclex-q-text').innerText = data.q;
+            const opts = document.getElementById('nclex-options');
+            opts.innerHTML = "";
+            data.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl border-2 border-slate-200 font-bold text-sm hover:border-blue-600 transition-colors";
+                btn.innerText = opt;
+                btn.onclick = () => {
+                    state.selectedNclexIdx = i;
+                    Array.from(opts.children).forEach(c => c.classList.remove('border-blue-600', 'bg-blue-50'));
+                    btn.classList.add('border-blue-600', 'bg-blue-50');
+                };
+                opts.appendChild(btn);
+            });
+            document.getElementById('nclex-feedback').innerText = "";
+            document.getElementById('finale-stage-1').classList.add('hidden');
+            document.getElementById('finale-stage-2').classList.remove('hidden');
+        }
+
+        function checkFinalStage2() {
+            const data = FINALE_DATA[state.level].nclex;
+            const feedback = document.getElementById('nclex-feedback');
+            if(state.selectedNclexIdx === -1) return;
+            if(state.selectedNclexIdx === data.a) {
                 document.getElementById('finale-modal').style.display = 'none';
-                state.level++; initMaze(); state.active = true;
+                state.level++; 
+                if(state.level === 5) state.level = 6; 
+                initMaze(); 
+                state.active = true;
+            } else {
+                feedback.innerText = "INCORRECT CLINICAL CHOICE";
+                feedback.className = "text-center text-xs font-bold uppercase mb-4 h-4 text-red-500";
+                document.getElementById('finale-stage-2').classList.add('shake');
+                setTimeout(() => document.getElementById('finale-stage-2').classList.remove('shake'), 500);
             }
         }
 
@@ -544,26 +716,20 @@
                         <div class="w-4 h-4 rounded-full border-2 ${active ? 'bg-blue-600 border-blue-600' : 'border-slate-200'} flex items-center justify-center">
                             ${active ? '<div class="w-1.5 h-1.5 bg-white rounded-full"></div>' : ''}
                         </div>
-                        Med Order Verification #${i}
+                        Order Verification #${i}
                     </div>
                 `;
             }
-
-            // Update Guidelines text based on floor
             const guideList = document.getElementById('guideline-list');
             let floorDesc = "Complete the medication orders for this floor.";
             switch(state.level) {
-                case 1: floorDesc = "Floor Focus: PO (Oral), SQ (Subcutaneous), and IM (Intramuscular) doses."; break;
-                case 2: floorDesc = "Floor Focus: IV Push (IVP) medication calculations."; break;
+                case 1: floorDesc = "Floor Focus: PO, SQ, and IM doses."; break;
+                case 2: floorDesc = "Floor Focus: IV Push (IVP) calculations."; break;
                 case 3: floorDesc = "Floor Focus: IV Infusion (mL/hr) calculations."; break;
-                case 4: floorDesc = "Floor Focus: IV Drip Rates (gtt/min) using gravity tubing."; break;
-                case 5: floorDesc = "Floor Focus: Mixed Clinical Modalities (Review Floor)."; break;
-                case 6: floorDesc = "Floor Focus: Weight-based (per kg) IV calculations."; break;
+                case 4: floorDesc = "Floor Focus: IV Drip Rates (gtt/min) calculations."; break;
+                case 5: floorDesc = "Floor Focus: Weight-based (per kg) IV calculations."; break;
             }
-            guideList.innerHTML = `
-                <li class="flex gap-2"><span>•</span><span>${floorDesc}</span></li>
-                <li class="flex gap-2"><span>•</span><span>Navigate to yellow Rx stations on the critical path.</span></li>
-            `;
+            guideList.innerHTML = `<li class="flex gap-2"><span>•</span><span>${floorDesc}</span></li><li class="flex gap-2"><span>•</span><span>Identify the 6 primary gates to unlock the Med Room.</span></li>`;
         }
 
         window.onkeydown = (e) => {
