@@ -9,339 +9,351 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
         
         :root {
-            --bg: #f8fafc;
-            --calc-bg: #121212;
-            --calc-btn: #333333;
-            --calc-accent: #ef4444; 
+            --bg: #fdfdfd;
+            --brand-blue: #2563eb;
+            --calc-bg: #1e293b;
+            --accent: #2563eb; 
         }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg);
-            color: #1e293b;
+            color: #334155;
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        /* Calculator Styles */
-        .calc-body {
-            background: var(--calc-bg);
-            padding: 8px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 240px;
-            margin: 0 auto;
-        }
-        .calc-screen-area {
-            text-align: right;
-            padding: 4px 8px;
-            color: white;
-            background: #000;
-            border-radius: 6px;
-            margin-bottom: 8px;
-        }
-        .calc-history { color: #666; font-size: 0.6rem; min-height: 0.8rem; font-family: 'JetBrains Mono', monospace; }
-        .calc-main-val { font-size: 1.25rem; font-weight: 400; font-family: 'JetBrains Mono', monospace; }
-        .calc-btn-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
-        .c-button {
-            aspect-ratio: 1/1; border-radius: 6px; font-size: 0.8rem; font-weight: 600;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-            transition: all 0.1s; user-select: none; border: none;
-            background: linear-gradient(145deg, #333, #111); color: white;
-        }
-        .c-button:active { transform: scale(0.92); }
-        .c-button.op { background: linear-gradient(145deg, var(--calc-accent), #b91c1c); }
-        .c-button.util { background: #444; }
-
-        /* Layout */
-        .game-grid {
+        .app-container {
             display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 1.5rem;
-            height: calc(100vh - 80px);
-            padding: 1.5rem;
-            overflow: hidden;
+            grid-template-columns: 1fr 320px;
+            flex: 1;
+            min-height: 0;
         }
 
-        #game-canvas-container {
-            background: #0f172a;
-            border-radius: 24px;
+        #viewport {
+            background: var(--brand-blue);
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            border: 4px solid #1e293b;
+            padding: 20px;
+            overflow: hidden;
         }
 
-        canvas { background: white; border-radius: 4px; cursor: crosshair; }
-
-        .canvas-overlay {
-            display: none; position: absolute; top: 0; left: 0;
-            width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9);
-            z-index: 50; align-items: center; justify-content: center; backdrop-filter: blur(8px);
+        canvas { 
+            background: white; 
+            border-radius: 4px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
-        .canvas-overlay.active { display: flex; }
 
-        .modal {
-            display: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 200; align-items: center; justify-content: center;
+        .sidebar {
+            background: white;
+            border-left: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            gap: 20px;
+            overflow-y: auto;
+            height: 100%;
         }
-        .modal.active { display: flex; }
 
-        .checklist-item { @apply flex items-center gap-3 text-[11px] font-bold py-1.5 border-b border-slate-50; }
+        .calc-wrapper {
+            background: var(--calc-bg);
+            border-radius: 16px;
+            padding: 16px;
+            color: white;
+            flex-shrink: 0;
+        }
+        .calc-display {
+            background: #000;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: right;
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .btn {
+            height: 44px;
+            border-radius: 6px;
+            border: none;
+            background: #334155;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .btn:active { transform: scale(0.95); opacity: 0.8; }
+        .btn-op { background: var(--accent); }
 
-        .syringe-barrel { 
-            width: 450px; height: 90px; border-radius: 0 45px 45px 0; 
-            background: rgba(255,255,255,0.95); position: relative; border: 3px solid #cbd5e1;
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent);
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .overlay {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.9);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .overlay.active { display: flex; }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .shake {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
         }
     </style>
 </head>
 <body>
 
-    <header class="h-16 border-b border-slate-200 flex items-center justify-between px-8 bg-white flex-shrink-0">
-        <div class="flex items-center gap-4">
-            <div class="p-2 bg-blue-600 rounded-lg shadow-md">
-                <!-- Mortar and Pestle Icon Restored -->
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.5 4.5L12 11"/><path d="M7.5 19.5c-2.2 0-4-1.8-4-4 0-.3.3-.6.6-.6h15.8c.3 0 .6.3.6.6 0 2.2-1.8 4-4 4h-9z"/><path d="M12 11L18.5 4.5c.8-.8 2-.8 2.8 0 .8.8.8 2 0 2.8L14.8 13.8"/><path d="M5.5 15c0-3.5 2.5-6.5 6-7.5"/></svg>
+    <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 flex-shrink-0">
+        <div class="flex items-center gap-5">
+            <div class="brand-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/>
+                    <path d="m8.5 8.5 7 7"/>
+                    <circle cx="16" cy="18" r="3"/>
+                </svg>
             </div>
             <div>
-                <h1 class="font-extrabold text-xl tracking-tighter leading-none">DOSAGE <span class="text-blue-600">SIM</span> Pro</h1>
-                <!-- Original Subtitle Restored -->
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Clinical Dosage Calculation Mastery</p>
+                <h1 class="text-2xl font-extrabold tracking-tight leading-none">
+                    <span class="text-slate-900">DOSAGE</span> 
+                    <span class="text-blue-600">SIM</span> 
+                    <span class="text-slate-900">Pro</span>
+                </h1>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mt-1">CLINICAL DOSAGE CALCULATION MODE</p>
             </div>
         </div>
-        <div class="text-right">
-            <p class="text-[9px] text-slate-400 uppercase font-black">Current Assignment</p>
-            <!-- Floors Restored -->
-            <p class="text-lg font-black text-blue-600" id="level-display">FLOOR 1</p>
+        <div class="flex gap-8">
+            <div class="text-right">
+                <span class="text-[10px] font-black text-slate-400 uppercase block">Active Station</span>
+                <span id="level-label" class="text-lg font-bold text-slate-900">FLOOR 1</span>
+            </div>
         </div>
     </header>
 
-    <main class="game-grid">
-        <div id="game-canvas-container">
+    <div class="app-container">
+        <section id="viewport">
             <canvas id="game-canvas"></canvas>
             
-            <div id="quiz-overlay" class="canvas-overlay">
-                <div class="bg-white p-8 rounded-[32px] shadow-2xl w-full max-w-md">
-                    <span id="q-header" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase inline-block mb-4">VERIFYING ORDER</span>
-                    <p id="q-text" class="text-slate-800 mb-6 text-lg font-bold leading-tight"></p>
-                    <div class="relative mb-6">
-                        <input type="number" step="0.01" id="q-input" class="w-full bg-slate-100 border-2 border-slate-200 rounded-2xl p-4 text-3xl font-mono text-center focus:border-blue-600 outline-none" placeholder="0.00">
-                        <p id="q-unit" class="text-center text-[10px] font-black text-slate-400 uppercase mt-2">UNIT</p>
+            <div id="quiz-overlay" class="overlay">
+                <div id="quiz-card" class="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-2 h-2 rounded-full bg-blue-600"></div>
+                        <span class="text-[10px] font-black uppercase text-slate-400">Order Verification</span>
                     </div>
-                    <button onclick="submitQuiz()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-black text-sm shadow-lg uppercase transition-all active:scale-95">Confirm Dosage</button>
-                    <p id="q-feedback" class="text-center font-bold mt-4 h-4 uppercase text-[10px]"></p>
+                    <p id="q-text" class="text-lg font-bold text-slate-800 leading-tight mb-6"></p>
+                    <div class="space-y-4">
+                        <div class="relative">
+                            <input type="number" id="q-input" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-4 text-2xl font-mono text-center outline-none focus:border-blue-600" placeholder="0.0">
+                            <span id="q-unit" class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase">UNIT</span>
+                        </div>
+                        <button onclick="submitQuiz()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold uppercase text-xs tracking-widest hover:bg-blue-600 transition-colors">Verify Dosage</button>
+                    </div>
+                    <p id="q-feedback" class="mt-4 text-center text-[10px] font-bold uppercase h-4"></p>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <aside id="sidebar" class="flex flex-col gap-4">
-            <div class="calc-body">
-                <div class="calc-screen-area">
-                    <div id="calc-hist" class="calc-history"></div>
-                    <div id="calc-main" class="calc-main-val">0</div>
+        <aside class="sidebar">
+            <div class="calc-wrapper shadow-xl">
+                <div class="calc-display">
+                    <div id="calc-hist" class="text-[10px] text-slate-400 h-4 mb-1"></div>
+                    <div id="calc-main" class="text-2xl font-bold">0</div>
                 </div>
-                <div class="calc-btn-container">
-                    <button class="c-button util" onclick="calcAction('C')">C</button>
-                    <button class="c-button util" onclick="calcAction('%')">%</button>
-                    <button class="c-button util" onclick="calcAction('back')">⌫</button>
-                    <button class="c-button op" onclick="calcAction('/')">÷</button>
-                    <button class="c-button" onclick="calcAction('7')">7</button>
-                    <button class="c-button" onclick="calcAction('8')">8</button>
-                    <button class="c-button" onclick="calcAction('9')">9</button>
-                    <button class="c-button op" onclick="calcAction('*')">×</button>
-                    <button class="c-button" onclick="calcAction('4')">4</button>
-                    <button class="c-button" onclick="calcAction('5')">5</button>
-                    <button class="c-button" onclick="calcAction('6')">6</button>
-                    <button class="c-button op" onclick="calcAction('-')">-</button>
-                    <button class="c-button" onclick="calcAction('1')">1</button>
-                    <button class="c-button" onclick="calcAction('2')">2</button>
-                    <button class="c-button" onclick="calcAction('3')">3</button>
-                    <button class="c-button op" onclick="calcAction('+')">+</button>
-                    <button class="c-button" onclick="calcAction('+/-')">±</button>
-                    <button class="c-button" onclick="calcAction('0')">0</button>
-                    <button class="c-button" onclick="calcAction('.')">.</button>
-                    <button class="c-button op" onclick="calcAction('=')">=</button>
+                <div class="calc-grid">
+                    <button class="btn col-span-2" onclick="calcAction('C')">CLEAR</button>
+                    <button class="btn" onclick="calcAction('back')">DEL</button>
+                    <button class="btn btn-op" onclick="calcAction('/')">÷</button>
+                    <button class="btn" onclick="calcAction('7')">7</button>
+                    <button class="btn" onclick="calcAction('8')">8</button>
+                    <button class="btn" onclick="calcAction('9')">9</button>
+                    <button class="btn btn-op" onclick="calcAction('*')">×</button>
+                    <button class="btn" onclick="calcAction('4')">4</button>
+                    <button class="btn" onclick="calcAction('5')">5</button>
+                    <button class="btn" onclick="calcAction('6')">6</button>
+                    <button class="btn btn-op" onclick="calcAction('-')">-</button>
+                    <button class="btn" onclick="calcAction('1')">1</button>
+                    <button class="btn" onclick="calcAction('2')">2</button>
+                    <button class="btn" onclick="calcAction('3')">3</button>
+                    <button class="btn btn-op" onclick="calcAction('+')">+</button>
+                    <button class="btn col-span-2" onclick="calcAction('0')">0</button>
+                    <button class="btn" onclick="calcAction('.')">.</button>
+                    <button class="btn btn-op" onclick="calcAction('=')">=</button>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex justify-between">
-                    <span>Shift Task List</span>
-                    <span id="progress-count" class="text-blue-600">0 / 6</span>
-                </h3>
+            <div class="flex-1">
+                <div class="flex justify-between items-end mb-4">
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order Verification Tasks</h3>
+                    <span id="progress-val" class="text-xs font-bold text-blue-600">0 / 6 Complete</span>
+                </div>
                 <div id="checklist-container"></div>
             </div>
 
-            <div class="bg-slate-900 rounded-2xl p-5 text-white flex flex-col shadow-lg mt-auto">
-                <div class="flex items-center gap-2 mb-2">
-                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <h3 id="unit-name" class="text-xs font-black uppercase tracking-tight">Safety Protocol</h3>
-                </div>
-                <div class="text-[10px] text-slate-400 leading-relaxed space-y-2">
-                    <p>• Verify 6 valid medication orders to unlock Medication Room.</p>
-                    <p>• Accuracy Threshold: ±0.01 deviation permitted.</p>
-                </div>
+            <div class="p-5 bg-blue-50 border border-blue-100 rounded-xl mb-6">
+                <h4 class="text-[10px] font-black text-blue-600 uppercase mb-3 tracking-widest">Clinical Guidelines</h4>
+                <ul class="text-[11px] text-blue-700 font-bold leading-relaxed space-y-2">
+                    <li class="flex gap-2">
+                        <span>•</span>
+                        <span>Navigate to each yellow station on the critical path to verify medication orders.</span>
+                    </li>
+                    <li class="flex gap-2">
+                        <span>•</span>
+                        <span>Resolve 6 orders to unlock the Med Room.</span>
+                    </li>
+                </ul>
             </div>
         </aside>
-    </main>
+    </div>
 
-    <div id="case-modal" class="modal">
-        <div class="bg-white w-full max-w-4xl p-12 rounded-[48px] shadow-2xl">
-            <div class="grid grid-cols-2 gap-12">
-                <div>
-                    <h2 class="text-3xl font-black text-slate-900 mb-6 tracking-tight">Final Verification</h2>
-                    <div class="bg-blue-50 border-l-4 border-blue-600 p-6 rounded-r-2xl mb-8">
-                        <p class="text-lg text-slate-800 font-extrabold leading-snug" id="finale-math-q"></p>
-                    </div>
-                    <button onclick="verifyFinaleDose()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-5 rounded-2xl font-black text-xl uppercase shadow-xl transition-all">Submit Accuracy Check</button>
-                </div>
-                <div class="bg-slate-100 rounded-[40px] flex items-center justify-center relative min-h-[350px] border-2 border-slate-200">
-                    <div id="active-measure-label" class="absolute top-[-25px] left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-2xl font-black text-2xl border-2 border-emerald-400 shadow-xl">0.0</div>
-                    <div id="equipment-visual-area"></div>
+    <div id="finale-modal" class="fixed inset-0 bg-slate-900/95 z-[200] hidden items-center justify-center p-6">
+        <div class="bg-white rounded-[32px] p-10 max-w-2xl w-full">
+            <h2 class="text-2xl font-black mb-2 text-slate-900">Med Room: Final Verification</h2>
+            <p id="finale-math-q" class="text-slate-600 mb-8 font-semibold text-lg"></p>
+            <div class="bg-slate-100 rounded-2xl p-10 mb-8 relative border-2 border-slate-200">
+                <div id="draw-label" class="absolute top-4 right-4 bg-slate-900 text-white px-4 py-1 rounded-full font-bold text-sm">0.0 mL</div>
+                <div id="syringe-container" class="h-20 w-full bg-white border-2 border-slate-300 rounded-r-[40px] relative overflow-hidden cursor-ew-resize">
+                    <div id="plunger" class="absolute inset-y-0 left-0 bg-blue-500/30 border-r-4 border-blue-600 w-0"></div>
                 </div>
             </div>
+            <button onclick="checkFinal()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold text-sm uppercase tracking-widest hover:shadow-lg transition-all">Submit Precision Check</button>
         </div>
     </div>
 
     <script>
-        const BANK = { 1: [], 2: [] };
-        let usedQuestions = new Set();
-
-        function initBanks() {
-            // FLOOR 1: ADULT MEDICATIONS (PO/SQ - NO PEDIATRICS)
-            const meds_f1 = [
-                { n: "Acetaminophen", s: [325, 500], u: "mg", f: "tabs", validOrders: [325, 500, 650, 1000] },
-                { n: "Metoprolol", s: [25, 50, 100], u: "mg", f: "tabs", validOrders: [12.5, 25, 50, 100, 150] },
-                { n: "Gabapentin", s: [100, 300, 400], u: "mg", f: "caps", validOrders: [100, 300, 600, 900] },
-                { n: "Prednisone", s: [5, 10, 20], u: "mg", f: "tabs", validOrders: [2.5, 5, 15, 30, 40, 60] },
-                { n: "Warfarin", s: [2, 5], u: "mg", f: "tabs", validOrders: [1, 2.5, 5, 7.5, 10] },
-                { n: "Heparin", s: [5000], u: "Units", f: "mL", sc: 5000, validOrders: [2500, 5000, 7500, 10000] }
-            ];
-
-            meds_f1.forEach(m => {
-                m.validOrders.forEach(o => {
-                    m.s.forEach(supply => {
-                        let dose = o / supply;
-                        if (m.f === "tabs" && dose % 0.5 === 0) {
-                            BANK[1].push({ q: `Order: ${m.n} ${o}mg PO. Supply: ${supply}mg scored tablets. Give?`, a: dose, u: "tabs", id: `F1_${m.n}${o}${supply}` });
-                        } else if (m.f === "caps" && dose % 1 === 0) {
-                            BANK[1].push({ q: `Order: ${m.n} ${o}mg PO. Supply: ${supply}mg capsules. Give?`, a: dose, u: "caps", id: `F1_${m.n}${o}${supply}` });
-                        } else if (m.f === "mL") {
-                            BANK[1].push({ q: `Order: ${m.n} ${o} Units SubQ. Supply: ${supply} Units/mL. Give?`, a: o / supply, u: "mL", id: `F1_${m.n}${o}` });
-                        }
-                    });
-                });
-            });
-
-            // FLOOR 2: ADULT ACUTE/ICU MEDICATIONS
-            const meds_f2 = [
-                { n: "Morphine", o: 4, s: 10, su: "mg/mL", unit: "mL" },
-                { n: "Hydromorphone", o: 0.5, s: 2, su: "mg/mL", unit: "mL" },
-                { n: "Furosemide IV", o: 40, s: 10, su: "mg/mL", unit: "mL" },
-                { n: "Amiodarone", o: 150, s: 50, su: "mg/mL", unit: "mL" },
-                { n: "Metoprolol IV", o: 5, s: 1, su: "mg/mL", unit: "mL" },
-                { n: "Lorazepam", o: 2, s: 4, su: "mg/mL", unit: "mL" }
-            ];
-            meds_f2.forEach(m => BANK[2].push({
-                q: `Acute Protocol: ${m.n} ${m.o}mg IV Push. Supply: ${m.s}mg/mL. Calculate volume.`,
-                a: m.o / m.s, u: "mL", id: `F2_${m.n}${m.o}`
-            }));
-        }
-
-        let state = { 
-            level: 1, player: {x: 1, y: 1}, maze: [], questionsSolved: 0, 
-            calcStr: "0", calcHist: "", isModalActive: false 
-        };
-
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
-        const TILE = 40; const SIZE = 17;
+        const TILE = 40; const SIZE = 15;
         canvas.width = TILE * SIZE; canvas.height = TILE * SIZE;
 
-        function calcAction(val) {
-            const calcMain = document.getElementById('calc-main');
-            const calcHist = document.getElementById('calc-hist');
-            if (val === 'C') { state.calcStr = "0"; state.calcHist = ""; }
-            else if (val === 'back') { state.calcStr = state.calcStr.length > 1 ? state.calcStr.slice(0, -1) : "0"; }
-            else if (val === '=') {
-                try {
-                    state.calcHist = state.calcStr + " =";
-                    state.calcStr = Number(eval(state.calcStr.replace('×','*').replace('÷','/')).toFixed(4)).toString();
-                } catch { state.calcStr = "Err"; }
-            } else if (val === '+/-') { state.calcStr = (parseFloat(state.calcStr) * -1).toString(); }
-            else {
-                if (state.calcStr === "0" && val !== '.') state.calcStr = val;
-                else state.calcStr += val;
+        let state = {
+            level: 1, maze: [], player: {x:1, y:1}, solved: 0,
+            calcStr: "0", calcHist: "", active: true,
+            currentQ: null, targetDose: 0, drawDose: 0,
+            gates: [], activeCell: null
+        };
+
+        const BANK = [
+            { q: "Order: Digoxin 0.125 mg IV Push. Supply: 0.25 mg/mL. How many mL?", a: 0.5, u: "mL" },
+            { q: "Order: Heparin 5,000 Units SQ. Supply: 10,000 Units/mL. How many mL?", a: 0.5, u: "mL" },
+            { q: "Order: Morphine 4 mg IV Push. Supply: 10 mg/mL. How many mL?", a: 0.4, u: "mL" },
+            { q: "Order: Furosemide 40 mg IV Push. Supply: 10 mg/mL. How many mL?", a: 4, u: "mL" },
+            { q: "Order: Metoprolol 25 mg PO. Supply: 50 mg tablets. How many tabs?", a: 0.5, u: "TABS" },
+            { q: "Order: Amoxicillin 500 mg PO. Supply: 250 mg/5 mL. How many mL?", a: 10, u: "mL" },
+            { q: "Order: Hydromorphone 0.5 mg IV. Supply: 2 mg/mL. How many mL?", a: 0.25, u: "mL" },
+            { q: "Order: Ondansetron 4 mg IV. Supply: 2 mg/mL. How many mL?", a: 2, u: "mL" },
+            { q: "Order: Lisinopril 10 mg PO. Supply: 20 mg tablets. How many tabs?", a: 0.5, u: "TABS" },
+            { q: "Order: Potassium Chloride 20 mEq PO. Supply: 10 mEq/5 mL. How many mL?", a: 10, u: "mL" },
+            { q: "Order: Prednisone 10 mg PO. Supply: 5 mg tablets. How many tabs?", a: 2, u: "TABS" },
+            { q: "Order: Epinephrine 0.3 mg IM. Supply: 1 mg/mL. How many mL?", a: 0.3, u: "mL" }
+        ];
+
+        function findPath(start, end) {
+            let queue = [[start]];
+            let visited = new Set();
+            visited.add(`${start.x},${start.y}`);
+            while(queue.length > 0) {
+                let path = queue.shift();
+                let node = path[path.length - 1];
+                if(node.x === end.x && node.y === end.y) return path;
+                [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx, dy]) => {
+                    let nx = node.x + dx, ny = node.y + dy;
+                    if(nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE && state.maze[ny][nx] !== 1 && !visited.has(`${nx},${ny}`)) {
+                        visited.add(`${nx},${ny}`);
+                        queue.push([...path, {x: nx, y: ny}]);
+                    }
+                });
             }
-            calcMain.innerText = state.calcStr; calcHist.innerText = state.calcHist;
+            return [];
         }
 
-        function getDist(p1, p2) { return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y); }
-
-        function generateMaze() {
+        function initMaze() {
             state.maze = Array(SIZE).fill().map(() => Array(SIZE).fill(1));
             const stack = [{x:1, y:1}];
             state.maze[1][1] = 0;
-            usedQuestions.clear();
-
-            while(stack.length > 0) {
-                const curr = stack[stack.length-1];
-                const ns = [];
-                [[0,2],[0,-2],[2,0],[-2,0]].forEach(([dx,dy]) => {
-                    const nx = curr.x+dx, ny = curr.y+dy;
-                    if(nx>0 && nx<SIZE-1 && ny>0 && ny<SIZE-1 && state.maze[ny][nx]===1) ns.push({x:nx, y:ny, dx:dx/2, dy:dy/2});
-                });
+            while(stack.length) {
+                const c = stack[stack.length-1];
+                const ns = [[0,2],[0,-2],[2,0],[-2,0]].map(([dx,dy])=>({x:c.x+dx, y:c.y+dy, mx:c.x+dx/2, my:c.y+dy/2}))
+                    .filter(n => n.x>0 && n.x<SIZE-1 && n.y>0 && n.y<SIZE-1 && state.maze[n.y][n.x]===1);
                 if(ns.length) {
                     const n = ns[Math.floor(Math.random()*ns.length)];
-                    state.maze[n.y][n.x] = 0; state.maze[curr.y+n.dy][curr.x+n.dx] = 0;
+                    state.maze[n.y][n.x] = 0; state.maze[n.my][n.mx] = 0;
                     stack.push(n);
-                    if(n.x === SIZE-2 && n.y === SIZE-2) state.solutionPath = stack.map(p => ({...p}));
                 } else stack.pop();
             }
 
-            // Primary Gates
-            let pathNodes = state.solutionPath.slice(3, -3);
-            for(let i=0; i<6; i++) {
-                if (pathNodes.length === 0) break;
-                let idx = Math.floor(Math.random()*pathNodes.length);
-                let p = pathNodes.splice(idx,1)[0];
-                state.maze[p.y][p.x] = 2; 
-            }
+            const criticalPath = findPath({x:1, y:1}, {x:SIZE-2, y:SIZE-2});
+            state.gates = [];
 
-            // Distractor Rule Implementation (Distance >= 5)
-            let distractors = [];
-            let validCells = [];
-            for(let y=1; y<SIZE-1; y++) {
-                for(let x=1; x<SIZE-1; x++) {
-                    if(state.maze[y][x] === 0 && !state.solutionPath.some(p => p.x === x && p.y === y)) {
-                        validCells.push({x, y});
-                    }
+            let pathOptions = criticalPath.slice(2, -2).sort(() => Math.random() - 0.5);
+            let placedCount = 0;
+            for(let opt of pathOptions) {
+                if(placedCount >= 6) break;
+                if(state.gates.every(g => Math.abs(g.x-opt.x)+Math.abs(g.y-opt.y) >= 4)) {
+                    state.maze[opt.y][opt.x] = 2; 
+                    state.gates.push(opt);
+                    placedCount++;
                 }
             }
 
-            let distCount = 0;
-            let attempts = 0;
-            while(distCount < 5 && validCells.length > 0 && attempts < 300) {
-                attempts++;
-                let idx = Math.floor(Math.random() * validCells.length);
-                let candidate = validCells[idx];
-                if (!distractors.some(d => getDist(d, candidate) < 5)) {
-                    state.maze[candidate.y][candidate.x] = 4;
-                    distractors.push(candidate);
-                    validCells.splice(idx, 1);
-                    distCount++;
+            let pathSet = new Set(criticalPath.map(p => `${p.x},${p.y}`));
+            let offPathOptions = [];
+            for(let y=0; y<SIZE; y++) {
+                for(let x=0; x<SIZE; x++) {
+                    if(state.maze[y][x] === 0 && !pathSet.has(`${x},${y}`)) offPathOptions.push({x, y});
+                }
+            }
+            offPathOptions.sort(() => Math.random() - 0.5);
+            let distractorCount = 0;
+            for(let opt of offPathOptions) {
+                if(distractorCount >= 4) break;
+                if(state.gates.every(g => Math.abs(g.x-opt.x)+Math.abs(g.y-opt.y) >= 4)) {
+                    state.maze[opt.y][opt.x] = 5; 
+                    state.gates.push(opt);
+                    distractorCount++;
                 }
             }
 
             state.maze[SIZE-2][SIZE-2] = 3; 
-            state.questionsSolved = 0;
-            state.player = {x:1, y:1};
-            updateChecklist();
-            draw();
+            state.maze[1][1] = 6; 
+            state.solved = 0; state.player = {x:1, y:1};
+            updateUI(); draw();
         }
 
         function draw() {
@@ -349,125 +361,179 @@
             for(let y=0; y<SIZE; y++) {
                 for(let x=0; x<SIZE; x++) {
                     const cell = state.maze[y][x];
+                    const px = x*TILE; const py = y*TILE;
+
                     if(cell === 1) { 
-                        ctx.fillStyle = "#1e293b"; ctx.fillRect(x*TILE, y*TILE, TILE, TILE); 
-                    } else if(cell === 2 || cell === 4 || cell === 5) {
-                        ctx.fillStyle = cell === 5 ? "#10b981" : "#f59e0b"; 
-                        ctx.beginPath(); ctx.arc(x*TILE+TILE/2, y*TILE+TILE/2, TILE/2.5, 0, Math.PI*2); ctx.fill();
-                        ctx.fillStyle = "white"; ctx.font = "bold 9px sans-serif"; ctx.textAlign = "center";
-                        ctx.fillText(cell === 5 ? "✓" : "RX", x*TILE+TILE/2, y*TILE+TILE/2+3.5);
-                    } else if(cell === 3) {
-                        ctx.fillStyle = state.questionsSolved >= 6 ? "#10b981" : "#475569";
-                        ctx.fillRect(x*TILE+4, y*TILE+4, TILE-8, TILE-8);
+                        ctx.fillStyle = "#cbd5e1"; ctx.fillRect(px, py, TILE, TILE); 
+                    } else if (cell === 6) {
+                        ctx.fillStyle = "#eff6ff"; ctx.fillRect(px, py, TILE, TILE);
+                        ctx.fillStyle = "#2563eb"; ctx.fillRect(px + 4, py + 4, TILE - 8, TILE - 8);
+                    } else {
+                        ctx.fillStyle = "white"; ctx.fillRect(px, py, TILE, TILE);
+                    }
+
+                    if(cell === 2 || cell === 5) {
+                        ctx.fillStyle = "#f59e0b"; 
+                        ctx.beginPath(); ctx.arc(px+TILE/2, py+TILE/2, TILE/3, 0, Math.PI*2); ctx.fill();
+                        ctx.fillStyle = "white"; ctx.font = "bold 10px sans-serif"; ctx.textAlign = "center";
+                        ctx.fillText("Rx", px+TILE/2, py+TILE/2+4);
+                    }
+                    if(cell === 4) {
+                        ctx.fillStyle = "#10b981";
+                        ctx.beginPath(); ctx.arc(px+TILE/2, py+TILE/2, TILE/3, 0, Math.PI*2); ctx.fill();
+                        ctx.fillStyle = "white"; ctx.font = "bold 10px sans-serif"; ctx.textAlign = "center";
+                        ctx.fillText("✔", px+TILE/2, py+TILE/2+4);
+                    }
+                    if(cell === 3) {
+                        const unlocked = state.solved >= 6;
+                        ctx.fillStyle = unlocked ? "#10b981" : "#475569";
+                        ctx.fillRect(px+2, py+2, TILE-4, TILE-4);
                         ctx.fillStyle = "white"; ctx.font = "bold 7px sans-serif"; ctx.textAlign = "center";
-                        ctx.fillText("MED", x*TILE+TILE/2, y*TILE+TILE/2+3);
+                        ctx.fillText(unlocked ? "OPEN" : "LOCKED", px+TILE/2, py+TILE/2-1);
+                        ctx.fillText("MED RM", px+TILE/2, py+TILE/2+7);
                     }
                 }
             }
-            ctx.fillStyle = "#f43f5e";
-            ctx.beginPath(); ctx.arc(state.player.x*TILE+TILE/2, state.player.y*TILE+TILE/2, TILE/3, 0, Math.PI*2); ctx.fill();
-            ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
+            ctx.fillStyle = "#2563eb";
+            ctx.beginPath(); ctx.arc(state.player.x*TILE+TILE/2, state.player.y*TILE+TILE/2, 10, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = "white"; ctx.lineWidth = 3; ctx.stroke();
         }
 
-        function handleMove(key) {
-            if(state.isModalActive) return;
-            let dx=0, dy=0;
-            if(key === 'ArrowUp') dy = -1;
-            if(key === 'ArrowDown') dy = 1;
-            if(key === 'ArrowLeft') dx = -1;
-            if(key === 'ArrowRight') dx = 1;
+        function move(dx, dy) {
+            if(!state.active) return;
             const nx = state.player.x + dx, ny = state.player.y + dy;
-            if(nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE && state.maze[ny][nx] !== 1) {
-                if(state.maze[ny][nx] === 3 && state.questionsSolved < 6) return;
+            if(nx>=0 && nx<SIZE && ny>=0 && ny<SIZE && state.maze[ny][nx] !== 1) {
+                if(state.maze[ny][nx] === 3 && state.solved < 6) return;
                 state.player = {x:nx, y:ny};
-                if(state.maze[ny][nx] === 2) triggerQuiz(nx, ny, true);
-                else if(state.maze[ny][nx] === 4) triggerQuiz(nx, ny, false);
-                else if(state.maze[ny][nx] === 3) triggerFinale();
+                if(state.maze[ny][nx] === 2 || state.maze[ny][nx] === 5) openQuiz(nx, ny, state.maze[ny][nx]);
+                if(state.maze[ny][nx] === 3) openFinale();
             }
             draw();
         }
 
-        function triggerQuiz(x, y, isPrimary) {
-            state.activeGate = {x, y, isPrimary}; state.isModalActive = true;
-            const bank = BANK[state.level] || BANK[1];
-            const q = bank[Math.floor(Math.random()*bank.length)];
-            state.currentQ = q;
-            document.getElementById('q-header').innerText = isPrimary ? "VERIFYING ORDER" : "SECONDARY CHECK";
-            document.getElementById('q-text').innerText = q.q;
-            document.getElementById('q-unit').innerText = q.u;
-            document.getElementById('q-input').value = ""; document.getElementById('q-feedback').innerText = "";
+        function openQuiz(x, y, type) {
+            state.active = false; 
+            state.activeCell = {x, y, type};
+            state.currentQ = BANK[Math.floor(Math.random()*BANK.length)];
+            document.getElementById('q-text').innerText = state.currentQ.q;
+            document.getElementById('q-unit').innerText = state.currentQ.u;
+            document.getElementById('q-input').value = "";
+            document.getElementById('q-feedback').innerText = "";
             document.getElementById('quiz-overlay').classList.add('active');
-            setTimeout(() => document.getElementById('q-input').focus(), 50);
+            setTimeout(() => document.getElementById('q-input').focus(), 100);
         }
 
         function submitQuiz() {
             const val = parseFloat(document.getElementById('q-input').value);
-            if(Math.abs(val - state.currentQ.a) < 0.005) {
-                if(state.activeGate.isPrimary) {
-                    state.questionsSolved++;
-                    state.maze[state.activeGate.y][state.activeGate.x] = 5; 
-                } else { state.maze[state.activeGate.y][state.activeGate.x] = 0; }
-                closeQuiz(); updateChecklist(); draw();
-            } else {
-                const f = document.getElementById('q-feedback');
-                f.innerText = "Recalculate Required"; f.style.color = "#ef4444";
-            }
-        }
-
-        function closeQuiz() { state.isModalActive = false; document.getElementById('quiz-overlay').classList.remove('active'); }
-
-        function updateChecklist() {
-            const container = document.getElementById('checklist-container');
-            container.innerHTML = "";
-            for(let i=1; i<=6; i++) {
-                const isCorrect = i <= state.questionsSolved;
-                const div = document.createElement('div');
-                div.className = "checklist-item text-slate-500";
-                div.innerHTML = `<span class="${isCorrect ? 'text-emerald-500' : 'text-slate-200'}">●</span> Verified Medication ${i}`;
-                container.appendChild(div);
-            }
-            document.getElementById('progress-count').innerText = `${state.questionsSolved} / 6`;
-            document.getElementById('level-display').innerText = `FLOOR ${state.level}`;
-        }
-
-        function triggerFinale() {
-            state.isModalActive = true;
-            state.targetVal = (Math.random() * 8 + 1).toFixed(1); 
-            document.getElementById('finale-math-q').innerText = `Pharmacy Requirement: Withdraw exactly ${state.targetVal} mL for the current patient order.`;
-            const area = document.getElementById('equipment-visual-area');
-            area.innerHTML = "";
-            const syringe = document.createElement('div'); syringe.className = "syringe-barrel mx-auto cursor-pointer";
-            const plunger = document.createElement('div');
-            plunger.className = "absolute bg-emerald-500/40 border-r-[6px] border-emerald-600 h-full pointer-events-none";
+            const feedback = document.getElementById('q-feedback');
+            const card = document.getElementById('quiz-card');
             
-            const handleInteract = (clientX) => {
-                const rect = syringe.getBoundingClientRect();
-                const pct = Math.min(100, Math.max(0, (clientX - rect.left)/rect.width * 100));
-                plunger.style.width = pct + "%";
-                state.currentVal = (pct / 10).toFixed(1);
-                document.getElementById('active-measure-label').innerText = state.currentVal + " mL";
-            };
+            if(isNaN(val)) {
+                feedback.innerText = "ENTER A VALUE";
+                feedback.className = "mt-4 text-center text-[10px] font-bold uppercase h-4 text-red-500";
+                return;
+            }
 
-            syringe.onmousedown = (e) => {
-                handleInteract(e.clientX);
-                window.onmousemove = (ev) => handleInteract(ev.clientX);
-                window.onmouseup = () => window.onmousemove = null;
-            };
-            syringe.appendChild(plunger); area.appendChild(syringe);
-            document.getElementById('case-modal').classList.add('active');
-        }
-
-        function verifyFinaleDose() {
-            if(Math.abs(state.currentVal - state.targetVal) < 0.1) {
-                state.level = state.level === 1 ? 2 : 1;
-                document.getElementById('case-modal').classList.remove('active');
-                state.isModalActive = false;
-                generateMaze();
+            if(Math.abs(val - state.currentQ.a) < 0.01) {
+                // Correct answer
+                if(state.activeCell.type === 2) {
+                    state.solved++;
+                }
+                state.maze[state.activeCell.y][state.activeCell.x] = 4;
+                closeQuiz(); 
+                updateUI(); 
+                draw();
+            } else {
+                // Incorrect answer - shake effect
+                feedback.innerText = "INCORRECT DOSAGE";
+                feedback.className = "mt-4 text-center text-[10px] font-bold uppercase h-4 text-red-500";
+                card.classList.add('shake');
+                setTimeout(() => card.classList.remove('shake'), 500);
             }
         }
 
-        window.onkeydown = (e) => { if(document.activeElement.tagName !== 'INPUT') handleMove(e.key); };
-        window.onload = () => { initBanks(); generateMaze(); };
+        function closeQuiz() { 
+            state.active = true; 
+            document.getElementById('quiz-overlay').classList.remove('active'); 
+        }
+
+        function openFinale() {
+            state.active = false;
+            state.targetDose = (Math.random() * 8 + 1).toFixed(1);
+            document.getElementById('finale-math-q').innerText = `Med Room Access Task: Draw exactly ${state.targetDose} mL into the syringe.`;
+            document.getElementById('finale-modal').style.display = 'flex';
+            const syringe = document.getElementById('syringe-container');
+            const plunger = document.getElementById('plunger');
+            const label = document.getElementById('draw-label');
+            const update = (e) => {
+                const rect = syringe.getBoundingClientRect();
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                const pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
+                plunger.style.width = pct + "%";
+                state.drawDose = (pct / 10).toFixed(1);
+                label.innerText = state.drawDose + " mL";
+            };
+            const track = (e) => {
+                update(e);
+                const stop = () => { window.removeEventListener('mousemove', update); window.removeEventListener('touchmove', update); };
+                window.addEventListener('mousemove', update);
+                window.addEventListener('touchmove', update);
+                window.addEventListener('mouseup', stop, {once:true});
+                window.addEventListener('touchend', stop, {once:true});
+            };
+            syringe.onmousedown = track; syringe.ontouchstart = track;
+        }
+
+        function checkFinal() {
+            if(Math.abs(state.drawDose - state.targetDose) < 0.2) {
+                document.getElementById('finale-modal').style.display = 'none';
+                state.level++; initMaze(); state.active = true;
+            }
+        }
+
+        function calcAction(val) {
+            if(val === 'C') { state.calcStr = "0"; state.calcHist = ""; }
+            else if(val === 'back') { state.calcStr = state.calcStr.length > 1 ? state.calcStr.slice(0,-1) : "0"; }
+            else if(val === '=') {
+                try {
+                    let res = eval(state.calcStr.replace('×','*').replace('÷','/'));
+                    state.calcHist = state.calcStr + " =";
+                    state.calcStr = Number(res.toFixed(4)).toString();
+                } catch { state.calcStr = "Err"; }
+            } else {
+                if(state.calcStr === "0" && val !== '.') state.calcStr = val;
+                else state.calcStr += val;
+            }
+            document.getElementById('calc-main').innerText = state.calcStr;
+            document.getElementById('calc-hist').innerText = state.calcHist;
+        }
+
+        function updateUI() {
+            document.getElementById('level-label').innerText = `FLOOR ${state.level}`;
+            document.getElementById('progress-val').innerText = `${state.solved} / 6 Complete`;
+            const cont = document.getElementById('checklist-container');
+            cont.innerHTML = "";
+            for(let i=1; i<=6; i++) {
+                const active = i <= state.solved;
+                cont.innerHTML += `
+                    <div class="checklist-item ${active ? 'text-slate-900' : 'text-slate-300'}">
+                        <div class="w-4 h-4 rounded-full border-2 ${active ? 'bg-blue-600 border-blue-600' : 'border-slate-200'} flex items-center justify-center">
+                            ${active ? '<div class="w-1.5 h-1.5 bg-white rounded-full"></div>' : ''}
+                        </div>
+                        Med Order Verification #${i}
+                    </div>
+                `;
+            }
+        }
+
+        window.onkeydown = (e) => {
+            if(e.key === 'ArrowUp') move(0,-1);
+            if(e.key === 'ArrowDown') move(0,1);
+            if(e.key === 'ArrowLeft') move(-1,0);
+            if(e.key === 'ArrowRight') move(1,0);
+        };
+
+        initMaze();
     </script>
 </body>
 </html>
