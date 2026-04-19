@@ -12,7 +12,7 @@
             --bg: #f8fafc;
             --calc-bg: #121212;
             --calc-btn: #333333;
-            --calc-accent: #d4e94a; 
+            --calc-accent: #ef4444; 
         }
 
         body {
@@ -25,13 +25,15 @@
             overflow: hidden;
         }
 
-        /* Compact Calculator Styling */
+        /* Scaled Down Calculator */
         .calc-body {
             background: var(--calc-bg);
-            padding: 8px;
-            border-radius: 16px;
+            padding: 6px;
+            border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             width: 100%;
+            max-width: 240px;
+            margin: 0 auto;
         }
 
         .calc-screen-area {
@@ -39,19 +41,19 @@
             padding: 2px 6px;
             color: white;
             background: #000;
-            border-radius: 8px;
-            margin-bottom: 8px;
+            border-radius: 6px;
+            margin-bottom: 6px;
         }
 
         .calc-history {
             color: #666;
-            font-size: 0.6rem;
-            min-height: 0.8rem;
+            font-size: 0.55rem;
+            min-height: 0.7rem;
             font-family: 'JetBrains Mono', monospace;
         }
 
         .calc-main-val {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 400;
             letter-spacing: -0.5px;
         }
@@ -59,13 +61,13 @@
         .calc-btn-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 4px;
+            gap: 3px;
         }
 
         .c-button {
             aspect-ratio: 1/1;
-            border-radius: 8px;
-            font-size: 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -81,8 +83,8 @@
         .c-button:active { transform: scale(0.92); }
 
         .c-button.op {
-            background: linear-gradient(145deg, #d4e94a, #a8ba3b);
-            color: #1a1a1a;
+            background: linear-gradient(145deg, var(--calc-accent), #b91c1c);
+            color: #ffffff;
         }
 
         .c-button.util { background: #444; }
@@ -90,7 +92,7 @@
         /* Game Layout */
         .game-grid {
             display: grid;
-            grid-template-columns: 1fr 320px;
+            grid-template-columns: 1fr 300px;
             gap: 1rem;
             height: calc(100vh - 80px);
             padding: 1rem;
@@ -123,7 +125,7 @@
         }
 
         aside {
-            width: 320px;
+            width: 300px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
@@ -137,7 +139,6 @@
             pointer-events: none;
         }
 
-        /* Toggle Arrow Button */
         #sidebar-toggle {
             position: absolute;
             right: 10px;
@@ -156,13 +157,6 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
         }
-
-        #sidebar-toggle:hover {
-            background: #f1f5f9;
-            scale: 1.1;
-        }
-
-        .collapsed-icon { transform: rotate(180deg); }
 
         .modal {
             display: none;
@@ -198,12 +192,10 @@
     <header class="h-16 border-b border-slate-200 flex items-center justify-between px-8 bg-white flex-shrink-0">
         <div class="flex items-center gap-4">
             <div class="p-2 bg-rose-600 rounded-lg shadow-md flex items-center justify-center">
-                <!-- Restored Mortar & Pestle Icon -->
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M3 10C3 15 7.02944 19 12 19C16.9706 19 21 15 21 10H3Z" fill="white"/>
                     <path d="M5 8H19V10H5V8Z" fill="white"/>
                     <rect x="8" y="19" width="8" height="2" rx="1" fill="white"/>
-                    <!-- Pestle restored -->
                     <path d="M16 4L13 10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
                 </svg>
             </div>
@@ -274,10 +266,10 @@
                     <h3 id="unit-name" class="text-xs font-black">Med-Surg Unit</h3>
                 </div>
                 <p id="floor-specialty" class="text-[9px] text-blue-400 font-bold uppercase mb-2 leading-tight tracking-wide border-b border-slate-800 pb-1">
-                    Focus: Basic PO, SQ, IM Dosing
+                    Focus: Clinical PO, SQ, IM Dosing
                 </p>
                 <div class="text-[10px] text-slate-400 leading-relaxed space-y-1">
-                    <p>Collect all 6 primary yellow RX gates on the solution path.</p>
+                    <p>Collect all 6 primary yellow RX gates. Corrected gates turn green.</p>
                 </div>
             </div>
         </aside>
@@ -288,7 +280,7 @@
         <div class="bg-white p-8 rounded-[32px] shadow-2xl w-full max-w-xs">
             <span id="q-header" class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-[9px] font-black uppercase inline-block mb-4">RX VERIFICATION</span>
             <p id="q-text" class="text-slate-800 mb-6 text-base font-bold leading-tight"></p>
-            <input type="number" step="0.1" id="q-input" class="w-full bg-slate-100 border-2 border-slate-200 rounded-xl p-4 text-3xl font-mono text-center mb-2 focus:border-blue-600 outline-none" placeholder="0.0">
+            <input type="number" step="0.001" id="q-input" class="w-full bg-slate-100 border-2 border-slate-200 rounded-xl p-4 text-3xl font-mono text-center mb-2 focus:border-blue-600 outline-none" placeholder="0.0">
             <p id="q-unit" class="text-center text-[9px] font-black text-slate-400 uppercase mb-6">UNIT</p>
             <button onclick="submitQuiz()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-sm shadow-lg uppercase">Confirm Dose</button>
             <p id="q-feedback" class="text-center font-bold mt-3 h-4 uppercase text-[10px]"></p>
@@ -327,31 +319,94 @@
         const BANK = { PO: [], IV_VAR: [], IV_RATE: [], IV_GTT: [], IV_KG: [] };
 
         function initBanks() {
-            const meds = ["Acetaminophen", "Furosemide", "Metoprolol", "Gabapentin"];
-            for(let i=0; i<30; i++){
-                const tabStrength = [25, 50, 100, 250, 500][i%5];
-                const mult = [0.5, 1, 1.5, 2][Math.floor(Math.random()*4)];
-                BANK.PO.push({q: `Order: ${meds[i%4]} ${tabStrength * mult}mg PO. Supply: ${tabStrength}mg tabs. Give how many tabs?`, a: mult, unit: 'tabs'});
+            const meds_po = [
+                { name: "Acetaminophen", strengths: [325, 500, 650], unit: "mg", form: "tabs" },
+                { name: "Metoprolol Tartrate", strengths: [25, 50, 100], unit: "mg", form: "tabs" },
+                { name: "Gabapentin", strengths: [100, 300, 400], unit: "mg", form: "caps" },
+                { name: "Amoxicillin", strengths: [250, 500], unit: "mg", form: "caps" },
+                { name: "Lisinopril", strengths: [5, 10, 20], unit: "mg", form: "tabs" },
+                { name: "Furosemide", strengths: [20, 40, 80], unit: "mg", form: "tabs" }
+            ];
+
+            for(let i=0; i<40; i++){
+                const med = meds_po[i % meds_po.length];
+                const strength = med.strengths[Math.floor(Math.random() * med.strengths.length)];
+                const multiplier = [0.5, 1, 1.5, 2][Math.floor(Math.random() * 4)];
+                const order = strength * multiplier;
+                BANK.PO.push({
+                    q: `Order: ${med.name} ${order}${med.unit} PO. Supply: ${strength}${med.unit} ${med.form}. Give how many ${med.form}?`,
+                    a: multiplier,
+                    unit: med.form
+                });
             }
-            const syringeMeds = ["Heparin", "Insulin", "Morphine"];
-            for(let i=0; i<20; i++){
-                const conc = [10, 20, 50][i%3];
-                const mult = [0.5, 1, 2, 4][Math.floor(Math.random()*4)];
-                BANK.PO.push({q: `Order: ${syringeMeds[i%3]} ${conc * mult}mg SQ. Supply: ${conc}mg / 2mL. Give how many mL?`, a: mult * 2, unit: 'mL'});
+
+            const insulinNames = ["Humalog", "Novolog", "Lantus"];
+            for(let i=0; i<15; i++) {
+                const doseUnits = [2, 4, 6, 8, 10, 15, 20][i % 7];
+                BANK.PO.push({
+                    q: `Order: ${insulinNames[i%3]} Insulin ${doseUnits} Units SubQ. Supply: U-100 vial (100 Units/mL). Give how many mL?`, 
+                    a: doseUnits / 100, 
+                    unit: 'mL'
+                });
             }
-            for(let i=0; i<40; i++){ BANK.IV_VAR.push({q: `Order: Med ${2*i}mg IV Push. Supply: 2mg/1mL. Give how many mL?`, a: i, unit: 'mL'}); }
-            for(let i=0; i<30; i++) { BANK.IV_RATE.push({q: `Infuse 100mL over 30 min. Rate in mL/hr?`, a: 200, unit:'mL/hr'}); }
-            for(let i=0; i<30; i++) { BANK.IV_GTT.push({q: `1000mL over 8hrs. DF 15gtt/mL. gtt/min?`, a: 31, unit:'gtt/min'}); }
-            for(let i=0; i<30; i++) { BANK.IV_KG.push({q: `5mcg/kg/min for 70kg. Bag 400mg/250mL. mL/hr?`, a: 13, unit:'mL/hr'}); }
+
+            const heparinMeds = [
+                { dose: 5000, supply: 5000 },
+                { dose: 5000, supply: 10000 },
+                { dose: 2500, supply: 5000 },
+                { dose: 7500, supply: 10000 }
+            ];
+            heparinMeds.forEach(h => {
+                BANK.PO.push({
+                    q: `Order: Heparin ${h.dose} Units SubQ. Supply: ${h.supply} Units/mL. Give how many mL?`, 
+                    a: h.dose / h.supply, 
+                    unit: 'mL'
+                });
+            });
+
+            const iv_push = [
+                { name: "Morphine", dose: 2, supply: 4, unit: "mg", supplyUnit: "mg/mL" },
+                { name: "Morphine", dose: 4, supply: 10, unit: "mg", supplyUnit: "mg/mL" },
+                { name: "Hydromorphone", dose: 0.5, supply: 2, unit: "mg", supplyUnit: "mg/mL" },
+                { name: "Hydromorphone", dose: 1, supply: 2, unit: "mg", supplyUnit: "mg/mL" },
+                { name: "Furosemide", dose: 20, supply: 10, unit: "mg", supplyUnit: "mg/mL" },
+                { name: "Furosemide", dose: 40, supply: 10, unit: "mg", supplyUnit: "mg/mL" }
+            ];
+            iv_push.forEach(iv => {
+                BANK.IV_VAR.push({
+                    q: `Order: ${iv.name} ${iv.dose}${iv.unit} IV Push. Supply: ${iv.supply}${iv.supplyUnit}. Give how many mL?`,
+                    a: iv.dose / iv.supply,
+                    unit: 'mL'
+                });
+            });
+
+            for(let i=0; i<30; i++) { 
+                const vol = [250, 500, 1000][i%3];
+                const time = [4, 8, 12][Math.floor(Math.random()*3)];
+                BANK.IV_RATE.push({q: `Infuse ${vol}mL over ${time} hours. Rate in mL/hr?`, a: Math.round(vol/time), unit:'mL/hr'}); 
+            }
         }
 
         const SCENARIOS = {
-            1: { name: "Med-Surg Unit", specialty: "Basic PO, SQ, IM Dosing", nclex: { q: "Priority action for a patient with dysphagia ordered a tablet?", options: [{t: "Check for liquid formulation with pharmacy", c: true, r: "Safe formulation choice is primary."}, {t: "Crush it immediately", c: false, r: "Risk of altering pharmacokinetics."}]}},
+            1: { name: "Med-Surg Unit", specialty: "Clinical PO, SQ, IM Dosing", nclex: { q: "Priority action for a patient with dysphagia ordered a tablet?", options: [{t: "Check for liquid formulation with pharmacy", c: true, r: "Safe formulation choice is primary."}, {t: "Crush it immediately", c: false, r: "Risk of altering pharmacokinetics."}]}},
             2: { name: "Cardiac Telemetry", specialty: "IV Administration & Rates", nclex: { q: "Key safety factor for 1g antibiotic in 100mL over 60 min?", options: [{t: "Verify rate of administration", c: true, r: "Prevents toxic reactions like Red Man Syndrome."}, {t: "Use 18G needle", c: false, r: "Gauge is secondary to infusion rate."}]}},
             3: { name: "Oncology Unit", specialty: "Complex Fluids & Compatibility", nclex: { q: "Priority for hanging a secondary med with TPN primary?", options: [{t: "Verify compatibility with TPN", c: true, r: "TPN is highly reactive with many meds."}, {t: "Use lower port", c: false, r: "Doesn't solve chemical compatibility."}]}}
         };
 
-        let state = { level: 1, player: {x: 1, y: 1}, maze: [], questionsSolved: 0, calcStr: "0", calcHist: "", currentVal: 0, targetVal: 0, solutionPath: [] };
+        let state = { 
+            level: 1, 
+            player: {x: 1, y: 1}, 
+            maze: [], 
+            questionsSolved: 0, 
+            calcStr: "0", 
+            calcHist: "", 
+            currentVal: 0, 
+            targetVal: 0, 
+            solutionPath: [], 
+            isModalActive: false,
+            answeredGates: []
+        };
+
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         const TILE = 40; 
@@ -361,9 +416,7 @@
 
         function toggleSidebar() {
             const layout = document.getElementById('main-layout');
-            const icon = document.getElementById('toggle-icon');
             layout.classList.toggle('sidebar-collapsed');
-            icon.classList.toggle('collapsed-icon');
         }
 
         function calcAction(val) {
@@ -390,6 +443,7 @@
             state.maze = Array(SIZE).fill().map(() => Array(SIZE).fill(1));
             const stack = [{x:1, y:1}];
             state.maze[1][1] = 0;
+            state.answeredGates = [];
             state.solutionPath = [];
 
             while(stack.length > 0) {
@@ -408,8 +462,6 @@
                 } else stack.pop();
             }
 
-            if(state.solutionPath.length === 0) state.solutionPath = [{x:1, y:1}, {x:SIZE-2, y:SIZE-2}];
-
             let placedPrimary = 0;
             let pathNodes = [...state.solutionPath].slice(2, -2);
             while(placedPrimary < 6 && pathNodes.length > 0) {
@@ -420,9 +472,8 @@
             }
 
             let placedDistractor = 0;
-            let targetDistractors = Math.floor(Math.random() * 2) + 3;
             let attempts = 0;
-            while(placedDistractor < targetDistractors && attempts < 200) {
+            while(placedDistractor < 5 && attempts < 500) {
                 attempts++;
                 let rx = Math.floor(Math.random()*(SIZE-2))+1;
                 let ry = Math.floor(Math.random()*(SIZE-2))+1;
@@ -449,11 +500,12 @@
                         ctx.fillStyle = "#1e293b"; 
                         ctx.fillRect(x*TILE, y*TILE, TILE, TILE); 
                     }
-                    if(cell === 2 || cell === 4) { 
-                        ctx.fillStyle = "#fbbf24"; 
+                    if(cell === 2 || cell === 4 || cell === 5) {
+                        const isAnswered = cell === 5 || state.answeredGates.some(g => g.x === x && g.y === y);
+                        ctx.fillStyle = isAnswered ? "#10b981" : "#fbbf24"; 
                         ctx.beginPath(); ctx.arc(x*TILE+TILE/2, y*TILE+TILE/2, TILE/2.5, 0, Math.PI*2); ctx.fill();
                         ctx.fillStyle = "black"; ctx.font = "bold 10px sans-serif"; ctx.textAlign = "center";
-                        ctx.fillText("RX", x*TILE+TILE/2, y*TILE+TILE/2+4);
+                        ctx.fillText(isAnswered ? "✓" : "RX", x*TILE+TILE/2, y*TILE+TILE/2+4);
                     }
                     if(cell === 3) {
                         ctx.fillStyle = state.questionsSolved >= 6 ? "#10b981" : "#334155";
@@ -470,25 +522,37 @@
         }
 
         function handleMove(key) {
+            if(state.isModalActive) return;
+
             let dx=0, dy=0;
             if(key === 'ArrowUp') dy = -1;
             if(key === 'ArrowDown') dy = 1;
             if(key === 'ArrowLeft') dx = -1;
             if(key === 'ArrowRight') dx = 1;
+
+            if(dx === 0 && dy === 0) return;
+
             const nx = state.player.x + dx, ny = state.player.y + dy;
             if(nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE && state.maze[ny][nx] !== 1) {
                 if(state.maze[ny][nx] === 3 && state.questionsSolved < 6) return;
+                
+                const isAnswered = state.answeredGates.some(g => g.x === nx && g.y === ny);
+                
                 state.player = {x:nx, y:ny};
-                if(state.maze[ny][nx] === 2) triggerQuiz(nx, ny, true);
-                if(state.maze[ny][nx] === 4) triggerQuiz(nx, ny, false);
-                if(state.maze[ny][nx] === 3) triggerFinale();
+                
+                if(!isAnswered) {
+                    if(state.maze[ny][nx] === 2) triggerQuiz(nx, ny, true);
+                    else if(state.maze[ny][nx] === 4) triggerQuiz(nx, ny, false);
+                    else if(state.maze[ny][nx] === 3) triggerFinale();
+                }
             }
             draw();
         }
 
         function triggerQuiz(x, y, isPrimary) {
             state.activeGate = {x, y, isPrimary};
-            const banks = [BANK.PO, BANK.IV_VAR, BANK.IV_RATE, BANK.IV_GTT, BANK.IV_KG];
+            state.isModalActive = true;
+            const banks = [BANK.PO, BANK.IV_VAR, BANK.IV_RATE];
             const activeBank = banks[Math.min(banks.length-1, state.level-1)];
             const q = activeBank[Math.floor(Math.random()*activeBank.length)];
             state.currentQ = q;
@@ -498,14 +562,20 @@
             document.getElementById('q-input').value = "";
             document.getElementById('q-feedback').innerText = "";
             document.getElementById('quiz-modal').classList.add('active');
+            setTimeout(() => document.getElementById('q-input').focus(), 100);
         }
 
         function submitQuiz() {
             const val = parseFloat(document.getElementById('q-input').value);
-            if(Math.abs(val - state.currentQ.a) < 0.1) {
-                if(state.activeGate.isPrimary) state.questionsSolved++;
-                state.maze[state.activeGate.y][state.activeGate.x] = 0;
-                document.getElementById('quiz-modal').classList.remove('active');
+            if(Math.abs(val - state.currentQ.a) < 0.005) {
+                if(state.activeGate.isPrimary) {
+                    state.questionsSolved++;
+                    state.answeredGates.push({x: state.activeGate.x, y: state.activeGate.y});
+                    state.maze[state.activeGate.y][state.activeGate.x] = 5; 
+                } else {
+                    state.maze[state.activeGate.y][state.activeGate.x] = 0; 
+                }
+                closeModals();
                 updateChecklist();
                 draw();
             } else {
@@ -514,19 +584,27 @@
             }
         }
 
+        function closeModals() {
+            state.isModalActive = false;
+            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+        }
+
         function updateChecklist() {
             const container = document.getElementById('checklist-container');
             container.innerHTML = "";
             for(let i=1; i<=6; i++) {
+                const isCorrect = i <= state.questionsSolved;
                 const div = document.createElement('div');
-                div.className = "checklist-item";
-                div.innerHTML = `<span class="${i<=state.questionsSolved?'text-emerald-500':'text-slate-200'}">${i<=state.questionsSolved?'●':'○'}</span> RX Gate ${i}`;
+                div.className = "checklist-item text-slate-500";
+                // Only the dot turns green
+                div.innerHTML = `<span class="${isCorrect ? 'text-emerald-500' : 'text-slate-200'} transition-colors duration-500">${isCorrect ? '●' : '○'}</span> RX Gate ${i}`;
                 container.appendChild(div);
             }
             document.getElementById('progress-count').innerText = `${state.questionsSolved} / 6`;
         }
 
         function triggerFinale() {
+            state.isModalActive = true;
             state.targetVal = 2.5; 
             document.getElementById('finale-math-q').innerText = "Draw 2.5 mL of Morphine IV.";
             const area = document.getElementById('equipment-visual-area');
@@ -577,7 +655,7 @@
                     nextBtn.disabled = !o.c;
                     nextBtn.style.opacity = o.c ? "1" : "0.3";
                     nextBtn.onclick = () => {
-                        document.getElementById('case-modal').classList.remove('active');
+                        closeModals();
                         state.level++; 
                         if(state.level > 3) state.level = 1;
                         document.getElementById('level-display').innerText = "FLOOR " + state.level;
@@ -591,7 +669,17 @@
             document.getElementById('finale-step-2').classList.remove('hidden');
         }
 
-        window.onkeydown = (e) => handleMove(e.key);
+        window.onkeydown = (e) => {
+            if(document.activeElement.tagName !== 'INPUT') {
+                handleMove(e.key);
+            }
+            if(e.key === 'Enter' && state.isModalActive) {
+                if(document.getElementById('quiz-modal').classList.contains('active')) {
+                    submitQuiz();
+                }
+            }
+        };
+
         window.onload = () => { initBanks(); generateMaze(); };
     </script>
 </body>
