@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dosage SIM Pro</title>
+    <title>DOSAGE SIM Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
         
         :root {
-            --bg: #f1f5f9;
-            --panel: #ffffff;
-            --accent: #2563eb;
-            --floor: #ffffff;
-            --wall: #0f172a;
-            --border: #cbd5e1;
+            --bg: #f8fafc;
+            --calc-bg: #121212;
+            --calc-btn: #333333;
+            --calc-accent: #d4e94a; 
         }
 
         body {
@@ -22,58 +20,159 @@
             background-color: var(--bg);
             color: #1e293b;
             height: 100vh;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
+        /* Compact Calculator Styling */
+        .calc-body {
+            background: var(--calc-bg);
+            padding: 8px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+
+        .calc-screen-area {
+            text-align: right;
+            padding: 2px 6px;
+            color: white;
+            background: #000;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .calc-history {
+            color: #666;
+            font-size: 0.6rem;
+            min-height: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .calc-main-val {
+            font-size: 1.2rem;
+            font-weight: 400;
+            letter-spacing: -0.5px;
+        }
+
+        .calc-btn-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+        }
+
+        .c-button {
+            aspect-ratio: 1/1;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.1s;
+            user-select: none;
+            background: linear-gradient(145deg, #333, #111);
+            color: white;
+            border: none;
+        }
+
+        .c-button:active { transform: scale(0.92); }
+
+        .c-button.op {
+            background: linear-gradient(145deg, #d4e94a, #a8ba3b);
+            color: #1a1a1a;
+        }
+
+        .c-button.util { background: #444; }
+
+        /* Game Layout */
         .game-grid {
             display: grid;
-            grid-template-columns: 1fr 420px;
-            gap: 1.5rem;
+            grid-template-columns: 1fr 320px;
+            gap: 1rem;
             height: calc(100vh - 80px);
-            padding: 1.5rem;
+            padding: 1rem;
+            overflow: hidden;
+            transition: grid-template-columns 0.3s ease;
+        }
+
+        .game-grid.sidebar-collapsed {
+            grid-template-columns: 1fr 0px;
+            gap: 0;
         }
 
         #game-canvas-container {
             background: #0f172a;
             border-radius: 24px;
-            padding: 12px;
-            box-shadow: inset 0 2px 20px rgba(0,0,0,0.5);
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 4px solid #334155;
+            overflow: hidden;
+            border: 4px solid #1e293b;
+            position: relative;
         }
 
-        #game-canvas {
-            background: #ffffff;
+        canvas {
+            background: white;
+            max-width: 95%;
+            max-height: 95%;
+            object-fit: contain;
             border-radius: 4px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
         }
 
-        .side-panel {
-            background: var(--panel);
-            border-radius: 24px;
+        aside {
+            width: 320px;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 1.25rem;
-            padding: 1.5rem;
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-            z-index: 50;
-            overflow-y: auto;
+            gap: 0.75rem;
+            opacity: 1;
+            transition: opacity 0.2s ease;
         }
+
+        .sidebar-collapsed aside {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Toggle Arrow Button */
+        #sidebar-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            width: 32px;
+            height: 32px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        #sidebar-toggle:hover {
+            background: #f1f5f9;
+            scale: 1.1;
+        }
+
+        .collapsed-icon { transform: rotate(180deg); }
 
         .modal {
             display: none;
             position: fixed;
             left: 0;
             top: 0;
-            width: calc(100% - 420px);
+            width: 100%;
             height: 100%;
-            background: rgba(15, 23, 42, 0.85);
-            z-index: 100;
+            background: rgba(0,0,0,0.85);
+            z-index: 200;
             align-items: center;
             justify-content: center;
             backdrop-filter: blur(8px);
@@ -81,8 +180,57 @@
 
         .modal.active { display: flex; }
 
-        /* Calculator Refined */
-        <aside class="flex flex-col gap-4 overflow-hidden">
+        .checklist-item {
+            @apply flex items-center gap-3 text-[10px] font-bold py-1 border-b border-slate-50;
+        }
+
+        .syringe-barrel { 
+            width: 400px; height: 80px; 
+            border-radius: 0 40px 40px 0; 
+            background: rgba(255,255,255,0.95);
+            position: relative;
+            border: 3px solid #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="h-16 border-b border-slate-200 flex items-center justify-between px-8 bg-white flex-shrink-0">
+        <div class="flex items-center gap-4">
+            <div class="p-2 bg-rose-600 rounded-lg shadow-md flex items-center justify-center">
+                <!-- Restored Mortar & Pestle Icon -->
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 10C3 15 7.02944 19 12 19C16.9706 19 21 15 21 10H3Z" fill="white"/>
+                    <path d="M5 8H19V10H5V8Z" fill="white"/>
+                    <rect x="8" y="19" width="8" height="2" rx="1" fill="white"/>
+                    <!-- Pestle restored -->
+                    <path d="M16 4L13 10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="font-extrabold text-xl tracking-tighter leading-none">
+                    <span class="text-black">DOSAGE</span> <span class="text-blue-600">SIM</span> <span class="text-black">Pro</span>
+                </h1>
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Clinical Competency Mode</p>
+            </div>
+        </div>
+        <div class="text-right">
+            <p class="text-[9px] text-slate-400 uppercase font-black">Floor Access</p>
+            <p class="text-lg font-black text-blue-600" id="level-display">FLOOR 1</p>
+        </div>
+    </header>
+
+    <main class="game-grid" id="main-layout">
+        <div id="game-canvas-container">
+            <button onclick="toggleSidebar()" id="sidebar-toggle" title="Toggle Tools">
+                <svg id="toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+            <canvas id="game-canvas"></canvas>
+        </div>
+
+        <aside id="sidebar">
             <div class="calc-body flex-shrink-0">
                 <div class="calc-screen-area">
                     <div id="calc-hist" class="calc-history"></div>
@@ -111,114 +259,25 @@
                     <button class="c-button op" onclick="calcAction('=')">=</button>
                 </div>
             </div>
-        /* Equipment Visuals & Labels */
-        .equipment-label {
-            @apply absolute top-[-40px] left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2 rounded-lg font-black text-lg border-2 border-blue-500 shadow-xl;
-        }
 
-        .cup-barrel { 
-            width: 160px; height: 220px; 
-            clip-path: polygon(10% 0%, 90% 0%, 80% 100%, 20% 100%);
-            background: rgba(255,255,255,0.8);
-            position: relative;
-            border: 4px solid #94a3b8;
-        }
-
-        .syringe-barrel { 
-            width: 380px; height: 80px; 
-            border-radius: 0 40px 40px 0; 
-            background: rgba(255,255,255,0.8);
-            position: relative;
-            border: 4px solid #94a3b8;
-        }
-
-        .iv-pump-chassis {
-            background: #cbd5e1;
-            border: 6px solid #94a3b8;
-            border-radius: 24px;
-            padding: 24px;
-            width: 300px;
-        }
-
-        .checklist-item {
-            @apply flex items-center gap-3 text-[12px] font-extrabold py-2 transition-all duration-300 border-b border-blue-50;
-        }
-        .checklist-done { @apply text-emerald-600 opacity-100; }
-        .checklist-todo { @apply text-slate-300; }
-    </style>
-</head>
-<body>
-
-    <header class="h-20 border-b-4 border-blue-600 flex items-center justify-between px-10 bg-white">
-        <div class="flex items-center gap-4">
-            <div class="p-2.5 bg-rose-600 rounded-xl shadow-lg shadow-rose-200">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-            </div>
-            <div>
-                <h1 class="font-extrabold text-2xl tracking-tighter text-slate-900">DOSAGE<span class="text-blue-600">SIM</span>PRO</h1>
-                <p class="text-[10px] text-blue-500 font-black uppercase tracking-widest" id="status-text">Clinical Competency Mode</p>
-            </div>
-        </div>
-        <div class="flex gap-8">
-            <div class="text-right">
-                <p class="text-[10px] text-slate-400 uppercase font-black">Floor Challenge</p>
-                <p class="text-xl font-black text-blue-600" id="level-display">FLOOR 1</p>
-            </div>
-        </div>
-    </header>
-
-    <main class="game-grid">
-        <div id="game-canvas-container">
-            <canvas id="game-canvas"></canvas>
-        </div>
-
-        <aside class="side-panel">
-            <div class="calculator-body">
-                <div id="calc-display" class="calc-screen">0</div>
-                <div class="calc-grid">
-                    <!-- Row 1 -->
-                    <button onclick="calcClear()" class="calc-btn calc-btn-clear">AC</button>
-                    <button onclick="calcPress('/')" class="calc-btn calc-btn-op">÷</button>
-                    <button onclick="calcPress('*')" class="calc-btn calc-btn-op">×</button>
-                    <button onclick="calcPress('-')" class="calc-btn calc-btn-op">-</button>
-                    
-                    <!-- Row 2 -->
-                    <button onclick="calcPress('7')" class="calc-btn">7</button>
-                    <button onclick="calcPress('8')" class="calc-btn">8</button>
-                    <button onclick="calcPress('9')" class="calc-btn">9</button>
-                    <button onclick="calcPress('+')" class="calc-btn calc-btn-op">+</button>
-                    
-                    <!-- Row 3 & 4 Layout -->
-                    <div class="col-span-3 grid grid-cols-3 gap-2">
-                        <button onclick="calcPress('4')" class="calc-btn">4</button>
-                        <button onclick="calcPress('5')" class="calc-btn">5</button>
-                        <button onclick="calcPress('6')" class="calc-btn">6</button>
-                        <button onclick="calcPress('1')" class="calc-btn">1</button>
-                        <button onclick="calcPress('2')" class="calc-btn">2</button>
-                        <button onclick="calcPress('3')" class="calc-btn">3</button>
-                        <button onclick="calcPress('0')" class="calc-btn col-span-2">0</button>
-                        <button onclick="calcPress('.')" class="calc-btn">.</button>
-                    </div>
-                    <button onclick="calcEval()" class="calc-btn calc-btn-eq">=</button>
-                </div>
-            </div>
-
-            <div class="bg-blue-50 rounded-[24px] p-5 border-2 border-blue-100">
-                <h3 class="text-[11px] font-black text-blue-700 uppercase tracking-widest mb-3 flex justify-between">
-                    <span>Shift Protocol Progress</span>
-                    <span id="progress-count">0 / 6</span>
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 flex-shrink-0 shadow-sm">
+                <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex justify-between">
+                    <span>Shift Progress</span>
+                    <span id="progress-count" class="text-blue-600">0 / 6</span>
                 </h3>
-                <div id="checklist-container" class="space-y-0.5"></div>
+                <div id="checklist-container"></div>
             </div>
 
-            <div class="flex-1 bg-slate-900 rounded-[24px] p-6 text-white border-b-8 border-blue-600">
-                <h3 class="text-[11px] font-black text-blue-400 uppercase tracking-widest mb-3">Nurse's Report</h3>
-                <p id="unit-name" class="text-lg font-extrabold mb-1">High-Acuity Unit</p>
-                <p id="floor-specialty" class="text-[10px] text-emerald-400 font-bold mb-4 uppercase tracking-wider">Specialty: ADVANCED CALCS</p>
-                
-                <div class="space-y-3 text-[11px] leading-relaxed text-slate-300">
-                    <p class="border-l-2 border-blue-500 pl-3">The facility architecture is complex. Beware of deceptive corridors.</p>
-                    <p class="border-l-2 border-amber-500 pl-3">Yellow Rx gates appear identical. Only those on the <span class="text-white font-bold">critical path</span> satisfy protocol.</p>
+            <div class="bg-slate-900 rounded-2xl p-4 text-white flex-shrink-0 flex flex-col shadow-lg">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <h3 id="unit-name" class="text-xs font-black">Med-Surg Unit</h3>
+                </div>
+                <p id="floor-specialty" class="text-[9px] text-blue-400 font-bold uppercase mb-2 leading-tight tracking-wide border-b border-slate-800 pb-1">
+                    Focus: Basic PO, SQ, IM Dosing
+                </p>
+                <div class="text-[10px] text-slate-400 leading-relaxed space-y-1">
+                    <p>Collect all 6 primary yellow RX gates on the solution path.</p>
                 </div>
             </div>
         </aside>
@@ -226,431 +285,314 @@
 
     <!-- Quiz Modal -->
     <div id="quiz-modal" class="modal">
-        <div class="bg-white border-4 border-blue-600 p-8 rounded-[40px] shadow-2xl w-full max-w-sm">
-            <div class="flex justify-between items-center mb-4">
-                <span id="q-category" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase tracking-tighter">VERIFICATION GATE</span>
-                <span id="q-id" class="text-slate-300 text-[10px] font-bold">#NCLEX</span>
-            </div>
-            <p id="q-text" class="text-slate-800 mb-8 text-base font-bold leading-snug"></p>
-            <div class="relative mb-6">
-                <input type="number" step="0.01" id="q-input" class="w-full bg-slate-100 border-2 border-slate-300 rounded-2xl p-5 text-4xl font-mono text-center outline-none focus:border-blue-600 text-blue-600" placeholder="0.0">
-                <div id="q-unit" class="text-center mt-2 text-[10px] font-black text-slate-400 uppercase">CALCULATED VALUE</div>
-            </div>
-            <button onclick="submitDose()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl font-black shadow-xl transition-all uppercase tracking-widest text-lg">Submit Calculation</button>
-            <p id="q-feedback" class="text-center font-black mt-4 h-4 uppercase tracking-widest text-xs"></p>
+        <div class="bg-white p-8 rounded-[32px] shadow-2xl w-full max-w-xs">
+            <span id="q-header" class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-[9px] font-black uppercase inline-block mb-4">RX VERIFICATION</span>
+            <p id="q-text" class="text-slate-800 mb-6 text-base font-bold leading-tight"></p>
+            <input type="number" step="0.1" id="q-input" class="w-full bg-slate-100 border-2 border-slate-200 rounded-xl p-4 text-3xl font-mono text-center mb-2 focus:border-blue-600 outline-none" placeholder="0.0">
+            <p id="q-unit" class="text-center text-[9px] font-black text-slate-400 uppercase mb-6">UNIT</p>
+            <button onclick="submitQuiz()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-sm shadow-lg uppercase">Confirm Dose</button>
+            <p id="q-feedback" class="text-center font-bold mt-3 h-4 uppercase text-[10px]"></p>
         </div>
     </div>
 
-    <!-- Case Finale Modal -->
+    <!-- Case/Finale Modal -->
     <div id="case-modal" class="modal">
-        <div class="bg-white border-4 border-emerald-500 w-full max-w-5xl p-12 rounded-[56px] shadow-2xl overflow-y-auto max-h-[90vh]">
-            <div id="finale-step-1" class="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div class="bg-white w-full max-w-4xl p-10 rounded-[48px] shadow-2xl overflow-y-auto max-h-[85vh]">
+            <div id="finale-step-1" class="grid grid-cols-2 gap-8">
                 <div>
-                    <h2 class="text-3xl font-black text-slate-900 mb-6 tracking-tight">Access Control: Final Dose</h2>
-                    <div class="bg-blue-50 p-8 rounded-[32px] border-2 border-blue-100 mb-8">
-                        <p class="text-[11px] text-blue-500 font-black uppercase mb-3">Safety Verification</p>
-                        <p class="text-lg text-slate-800 font-extrabold leading-tight" id="finale-math-q"></p>
+                    <h2 class="text-2xl font-black text-slate-900 mb-4">Med Room Prep</h2>
+                    <div class="bg-blue-50 p-6 rounded-2xl mb-6">
+                        <p class="text-base text-slate-800 font-extrabold" id="finale-math-q"></p>
                     </div>
-                    <div class="p-6 bg-slate-50 border-2 border-slate-200 rounded-2xl mb-4">
-                        <p class="text-[10px] font-black text-slate-400 uppercase mb-2">Instructions</p>
-                        <p class="text-xs text-slate-600 font-semibold italic">Click or drag on the equipment to the right to measure the precise dose. The label will update to show your current measurement.</p>
-                    </div>
-                    <button onclick="verifyFinaleAction()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-5 rounded-2xl font-black shadow-xl transition-all uppercase tracking-widest text-lg">Confirm Dose Selection</button>
+                    <button onclick="verifyFinaleDose()" class="w-full bg-emerald-600 text-white py-5 rounded-xl font-black text-lg uppercase">Confirm Measurement</button>
                 </div>
-                <div class="min-h-[400px] flex items-center justify-center bg-slate-200 rounded-[48px] border-4 border-white shadow-inner relative" id="equipment-container">
-                    <div id="active-measure-label" class="equipment-label">0.0</div>
+                <div class="bg-slate-100 rounded-[32px] flex items-center justify-center relative min-h-[300px]">
+                    <div id="active-measure-label" class="absolute top-[-40px] left-1/2 -translate-x-1/2 bg-black text-white px-5 py-2 rounded-lg font-bold text-lg border-2 border-lime-400 shadow-xl">0.0</div>
                     <div id="equipment-visual-area"></div>
                 </div>
             </div>
-            <div id="finale-step-2" class="hidden text-center">
-                <h2 class="text-4xl font-black text-slate-900 mb-4 tracking-tight">Clinical Judgment</h2>
-                <p class="text-slate-400 font-bold mb-10 text-[11px] uppercase tracking-[0.2em]">NCLEX Multiple Choice Verification</p>
-                <div class="max-w-3xl mx-auto">
-                    <p id="nclex-q" class="text-xl text-slate-700 mb-10 font-bold leading-relaxed bg-slate-50 p-8 rounded-3xl"></p>
-                    <div id="nclex-options" class="grid gap-4"></div>
-                    <div id="nclex-rationale" class="hidden mt-10 p-8 bg-emerald-50 rounded-[32px] border-2 border-emerald-100 text-left">
-                        <p id="rationale-text" class="text-slate-800 text-base font-semibold"></p>
-                        <button id="finale-continue" class="mt-8 w-full bg-slate-900 py-5 rounded-2xl text-white font-black text-lg uppercase tracking-widest hover:bg-black">Clock Out & Proceed</button>
-                    </div>
+            <div id="finale-step-2" class="hidden">
+                <h2 class="text-2xl font-black text-slate-900 mb-4 text-center">NCLEX Mastery</h2>
+                <div id="nclex-q" class="text-base text-slate-700 mb-6 font-bold bg-slate-50 p-6 rounded-2xl"></div>
+                <div id="nclex-options" class="grid gap-3"></div>
+                <div id="nclex-rationale" class="hidden mt-8 p-6 bg-emerald-50 rounded-2xl border-2 border-emerald-100">
+                    <p id="rationale-text" class="text-sm text-slate-800 font-semibold mb-4"></p>
+                    <button id="finale-next" class="w-full bg-black text-white py-4 rounded-xl font-black uppercase">Next Floor</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const categories = {
-            PO: { unit: 'tabs/mL', label: 'Oral' },
-            SQ: { unit: 'mL', label: 'Subcutaneous' },
-            IM: { unit: 'mL', label: 'Intramuscular' },
-            IV_INJ: { unit: 'mL', label: 'IV Push' },
-            IV_RATE: { unit: 'mL/hr', label: 'IV Flow' },
-            IV_GTT: { unit: 'gtt/min', label: 'IV Drip' },
-            IV_KG: { unit: 'mL/hr', label: 'Weight Based' }
-        };
+        const BANK = { PO: [], IV_VAR: [], IV_RATE: [], IV_GTT: [], IV_KG: [] };
 
-        const FLOOR_CONFIG = {
-            1: { name: "Med-Surg Unit", cats: ['PO', 'SQ', 'IM'], specialty: "Basic Administration" },
-            2: { name: "Telemetry Unit", cats: ['IV_INJ'], specialty: "Cardiac / IV Bolus" },
-            3: { name: "Oncology Unit", cats: ['IV_RATE'], specialty: "Chemo / Constant Rate" },
-            4: { name: "Pediatric Floor", cats: ['IV_GTT'], specialty: "Micro-Drip Systems" },
-            5: { name: "Critical Care", cats: ['IV_KG'], specialty: "Vasoactive Titrations" }
-        };
-
-        const nclexQuestions = [
-            {
-                q: "A patient's blood pressure drops significantly after receiving an IV medication. Which nursing intervention is the most appropriate first response?",
-                options: [
-                    { t: "A. Elevate the head of the bed to 90 degrees.", c: false, r: "Elevating the head of the bed may further decrease cerebral perfusion in a hypotensive patient." },
-                    { t: "B. Increase the primary IV fluid rate if ordered.", c: true, r: "Increasing fluid volume helps stabilize blood pressure in cases of sudden hypotension." },
-                    { t: "C. Wait 10 minutes and re-check the blood pressure.", c: false, r: "Acute hypotension requires immediate action, not delayed assessment." },
-                    { t: "D. Call the hospital pharmacist to report the reaction.", c: false, r: "The patient must be stabilized and the provider notified before administrative reporting." }
-                ]
-            },
-            {
-                q: "When preparing to administer a medication, the nurse notes the patient is wearing a red allergy band but the MAR does not list any allergies. What is the priority?",
-                options: [
-                    { t: "A. Administer the medication and check with the patient afterward.", c: false, r: "Never administer medication if an allergy status is unclear." },
-                    { t: "B. Ask the patient's roommate if they know the patient's allergies.", c: false, r: "Roommates are not a reliable or HIPAA-compliant source for medical history." },
-                    { t: "C. Interview the patient and verify the allergy before administration.", c: true, r: "Direct patient verification is the safest primary action in this scenario." },
-                    { t: "D. Remove the red band if the MAR is empty.", c: false, r: "Removing a safety alert without verification is a serious error." }
-                ]
+        function initBanks() {
+            const meds = ["Acetaminophen", "Furosemide", "Metoprolol", "Gabapentin"];
+            for(let i=0; i<30; i++){
+                const tabStrength = [25, 50, 100, 250, 500][i%5];
+                const mult = [0.5, 1, 1.5, 2][Math.floor(Math.random()*4)];
+                BANK.PO.push({q: `Order: ${meds[i%4]} ${tabStrength * mult}mg PO. Supply: ${tabStrength}mg tabs. Give how many tabs?`, a: mult, unit: 'tabs'});
             }
-        ];
-
-        function generateItemBank() {
-            const bank = [];
-            // PO/IM/SQ
-            for(let i=0; i<150; i++){
-                const dose = (Math.floor(Math.random()*10)+1)*50;
-                const supply = [25, 50, 100, 250, 500][Math.floor(Math.random()*5)];
-                bank.push({cat:'PO', q:`Order: Medication ${dose}mg PO. Supply: ${supply}mg tablets. Give how many tabs?`, a: dose/supply});
+            const syringeMeds = ["Heparin", "Insulin", "Morphine"];
+            for(let i=0; i<20; i++){
+                const conc = [10, 20, 50][i%3];
+                const mult = [0.5, 1, 2, 4][Math.floor(Math.random()*4)];
+                BANK.PO.push({q: `Order: ${syringeMeds[i%3]} ${conc * mult}mg SQ. Supply: ${conc}mg / 2mL. Give how many mL?`, a: mult * 2, unit: 'mL'});
             }
-            // IV Push
-            for(let i=0; i<100; i++){
-                const mg = (Math.floor(Math.random()*10)+2);
-                const supply = 10; const vol = 2;
-                bank.push({cat:'IV_INJ', q:`Order: Medication ${mg}mg via IV Push. Supply: ${supply}mg/${vol}mL. Volume to draw (mL)?`, a: (mg*vol)/supply});
-            }
-            // IV Rates
-            for(let i=0; i<100; i++){
-                const vol = [100, 250, 500][Math.floor(Math.random()*3)];
-                const min = [30, 45, 60, 90][Math.floor(Math.random()*4)];
-                bank.push({cat:'IV_RATE', q:`Order: ${vol}mL IVPB over ${min} minutes. Set pump rate (mL/hr).`, a: Math.round((vol/min)*60)});
-            }
-            // IV Drip
-            for(let i=0; i<100; i++){
-                const vol = 1000;
-                const hr = [8, 10, 12][Math.floor(Math.random()*3)];
-                const gttFactor = [10, 15, 20][Math.floor(Math.random()*3)];
-                bank.push({cat:'IV_GTT', q:`Order: ${vol}mL over ${hr} hours. Drop Factor: ${gttFactor} gtt/mL. Rate (gtt/min)?`, a: Math.round((vol*gttFactor)/(hr*60))});
-            }
-            // Weight based
-            for(let i=0; i<100; i++){
-                const kg = Math.floor(Math.random()*40)+50;
-                const mcg = [2, 5, 10][Math.floor(Math.random()*3)];
-                const bag = 400; const bagVol = 250;
-                const a = (mcg * kg * 60) / ((bag*1000)/bagVol);
-                bank.push({cat:'IV_KG', q:`Order: Dopamine ${mcg}mcg/kg/min. Weight: ${kg}kg. Bag: ${bag}mg/ ${bagVol}mL. Set pump (mL/hr).`, a: parseFloat(a.toFixed(1))});
-            }
-            return bank;
+            for(let i=0; i<40; i++){ BANK.IV_VAR.push({q: `Order: Med ${2*i}mg IV Push. Supply: 2mg/1mL. Give how many mL?`, a: i, unit: 'mL'}); }
+            for(let i=0; i<30; i++) { BANK.IV_RATE.push({q: `Infuse 100mL over 30 min. Rate in mL/hr?`, a: 200, unit:'mL/hr'}); }
+            for(let i=0; i<30; i++) { BANK.IV_GTT.push({q: `1000mL over 8hrs. DF 15gtt/mL. gtt/min?`, a: 31, unit:'gtt/min'}); }
+            for(let i=0; i<30; i++) { BANK.IV_KG.push({q: `5mcg/kg/min for 70kg. Bag 400mg/250mL. mL/hr?`, a: 13, unit:'mL/hr'}); }
         }
 
-        const ALL_QUESTIONS = generateItemBank();
-        const TILE_SIZE = 40;
-        const MAZE_SIZE = 17;
-        
-        let state = {
-            level: 1,
-            player: { x: 1, y: 1 },
-            maze: [],
-            solutionPath: [],
-            questionsSolved: 0,
-            totalRequired: 6,
-            activeGate: null,
-            currentQ: null,
-            calcValue: "0",
-            currentVal: 0,
-            targetVal: 0,
-            usedQuestions: new Set()
+        const SCENARIOS = {
+            1: { name: "Med-Surg Unit", specialty: "Basic PO, SQ, IM Dosing", nclex: { q: "Priority action for a patient with dysphagia ordered a tablet?", options: [{t: "Check for liquid formulation with pharmacy", c: true, r: "Safe formulation choice is primary."}, {t: "Crush it immediately", c: false, r: "Risk of altering pharmacokinetics."}]}},
+            2: { name: "Cardiac Telemetry", specialty: "IV Administration & Rates", nclex: { q: "Key safety factor for 1g antibiotic in 100mL over 60 min?", options: [{t: "Verify rate of administration", c: true, r: "Prevents toxic reactions like Red Man Syndrome."}, {t: "Use 18G needle", c: false, r: "Gauge is secondary to infusion rate."}]}},
+            3: { name: "Oncology Unit", specialty: "Complex Fluids & Compatibility", nclex: { q: "Priority for hanging a secondary med with TPN primary?", options: [{t: "Verify compatibility with TPN", c: true, r: "TPN is highly reactive with many meds."}, {t: "Use lower port", c: false, r: "Doesn't solve chemical compatibility."}]}}
         };
 
+        let state = { level: 1, player: {x: 1, y: 1}, maze: [], questionsSolved: 0, calcStr: "0", calcHist: "", currentVal: 0, targetVal: 0, solutionPath: [] };
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = TILE_SIZE * MAZE_SIZE;
-        canvas.height = TILE_SIZE * MAZE_SIZE;
+        const TILE = 40; 
+        const SIZE = 17;
+        canvas.width = TILE * SIZE;
+        canvas.height = TILE * SIZE;
 
-        const levelThemes = {
-            1: { finale: { q: "Ceftriaxone 1g IM. Supply: 500mg/10mL. Measure mL.", ans: 20, type: 'cup', unit: 'mL' } },
-            2: { finale: { q: "Morphine 4mg IV Push. Supply: 2mg/mL. Draw mL.", ans: 2, type: 'syringe', unit: 'mL' } },
-            3: { finale: { q: "D5W 1000mL over 8hr. Set mL/hr.", ans: 125, type: 'pump', unit: 'mL/hr' } },
-            4: { finale: { q: "NS 100mL over 1hr. Factor: 20 gtt/mL. Rate (gtt/min)?", ans: 33, type: 'pump', unit: 'gtt/min' } },
-            5: { finale: { q: "Dopamine 5mcg/kg/min. Pt: 70kg. Supply: 400mg/250mL. Set mL/hr.", ans: 13.1, type: 'pump', unit: 'mL/hr' } }
-        };
+        function toggleSidebar() {
+            const layout = document.getElementById('main-layout');
+            const icon = document.getElementById('toggle-icon');
+            layout.classList.toggle('sidebar-collapsed');
+            icon.classList.toggle('collapsed-icon');
+        }
+
+        function calcAction(val) {
+            const calcMain = document.getElementById('calc-main');
+            const calcHist = document.getElementById('calc-hist');
+            if (val === 'C') { state.calcStr = "0"; state.calcHist = ""; }
+            else if (val === 'back') { state.calcStr = state.calcStr.length > 1 ? state.calcStr.slice(0, -1) : "0"; }
+            else if (val === '=') {
+                try {
+                    state.calcHist = state.calcStr + " =";
+                    state.calcStr = Number(eval(state.calcStr.replace('×','*').replace('÷','/')).toFixed(4)).toString();
+                } catch { state.calcStr = "Error"; }
+            }
+            else if (val === '+/-') { state.calcStr = (parseFloat(state.calcStr) * -1).toString(); }
+            else {
+                if (state.calcStr === "0" && val !== '.') state.calcStr = val;
+                else state.calcStr += val;
+            }
+            calcMain.innerText = state.calcStr;
+            calcHist.innerText = state.calcHist;
+        }
 
         function generateMaze() {
-            state.maze = Array(MAZE_SIZE).fill().map(() => Array(MAZE_SIZE).fill(1));
-            const stack = [];
-            const start = {x: 1, y: 1};
-            state.maze[start.y][start.x] = 0;
-            stack.push(start);
+            state.maze = Array(SIZE).fill().map(() => Array(SIZE).fill(1));
+            const stack = [{x:1, y:1}];
+            state.maze[1][1] = 0;
+            state.solutionPath = [];
 
             while(stack.length > 0) {
-                const current = stack[stack.length - 1];
-                const neighbors = [];
-                [[0,-2],[0,2],[-2,0],[2,0]].forEach(([dx, dy]) => {
-                    const nx = current.x + dx, ny = current.y + dy;
-                    if(nx > 0 && nx < MAZE_SIZE - 1 && ny > 0 && ny < MAZE_SIZE - 1 && state.maze[ny][nx] === 1) {
-                        neighbors.push({x: nx, y: ny, dx: dx/2, dy: dy/2});
-                    }
-                });
-                if(neighbors.length > 0) {
-                    const next = neighbors[Math.floor(Math.random() * neighbors.length)];
-                    state.maze[current.y + next.dy][current.x + next.dx] = 0;
-                    state.maze[next.y][next.x] = 0;
-                    stack.push(next);
-                } else { stack.pop(); }
-            }
-
-            for(let i=0; i < 22; i++) {
-                let rx = Math.floor(Math.random() * (MAZE_SIZE - 2)) + 1;
-                let ry = Math.floor(Math.random() * (MAZE_SIZE - 2)) + 1;
-                if(state.maze[ry][rx] === 1) {
-                    let adj = 0;
-                    [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx,dy]) => { if(state.maze[ry+dy][rx+dx] === 0) adj++; });
-                    if(adj >= 2) state.maze[ry][rx] = 0;
-                }
-            }
-
-            const end = {x: MAZE_SIZE-2, y: MAZE_SIZE-2};
-            const parent = {};
-            const queue = [start];
-            const visited = new Set(['1,1']);
-            while(queue.length > 0) {
-                const curr = queue.shift();
-                if(curr.x === end.x && curr.y === end.y) break;
-                [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx, dy]) => {
+                const curr = stack[stack.length-1];
+                const ns = [];
+                [[0,2],[0,-2],[2,0],[-2,0]].forEach(([dx,dy]) => {
                     const nx = curr.x+dx, ny = curr.y+dy;
-                    if(nx >= 0 && nx < MAZE_SIZE && ny >= 0 && ny < MAZE_SIZE && state.maze[ny][nx] !== 1 && !visited.has(`${nx},${ny}`)) {
-                        visited.add(`${nx},${ny}`);
-                        parent[`${nx},${ny}`] = curr;
-                        queue.push({x: nx, y: ny});
-                    }
+                    if(nx>0 && nx<SIZE-1 && ny>0 && ny<SIZE-1 && state.maze[ny][nx]===1) ns.push({x:nx, y:ny, dx:dx/2, dy:dy/2});
                 });
+                if(ns.length) {
+                    const n = ns[Math.floor(Math.random()*ns.length)];
+                    state.maze[n.y][n.x] = 0;
+                    state.maze[curr.y+n.dy][curr.x+n.dx] = 0;
+                    stack.push(n);
+                    if(n.x === SIZE-2 && n.y === SIZE-2) state.solutionPath = stack.map(p => ({...p}));
+                } else stack.pop();
             }
 
-            state.solutionPath = [];
-            let c = end;
-            while(c) { state.solutionPath.push(c); c = parent[`${c.x},${c.y}`]; }
+            if(state.solutionPath.length === 0) state.solutionPath = [{x:1, y:1}, {x:SIZE-2, y:SIZE-2}];
 
-            const pGates = state.solutionPath.slice(3, -3);
-            pGates.sort(() => Math.random() - 0.5);
-            for(let i=0; i<6; i++) if(pGates[i]) state.maze[pGates[i].y][pGates[i].x] = 2; 
+            let placedPrimary = 0;
+            let pathNodes = [...state.solutionPath].slice(2, -2);
+            while(placedPrimary < 6 && pathNodes.length > 0) {
+                let idx = Math.floor(Math.random() * pathNodes.length);
+                let p = pathNodes.splice(idx, 1)[0];
+                state.maze[p.y][p.x] = 2; 
+                placedPrimary++;
+            }
 
-            let solSet = new Set(state.solutionPath.map(p => `${p.x},${p.y}`));
-            let distNeeded = 10;
-            for(let y=1; y<MAZE_SIZE-1 && distNeeded > 0; y++){
-                for(let x=1; x<MAZE_SIZE-1 && distNeeded > 0; x++){
-                    if(state.maze[y][x] === 0 && !solSet.has(`${x},${y}`) && Math.random() > 0.6) {
-                        state.maze[y][x] = 5;
-                        distNeeded--;
-                    }
+            let placedDistractor = 0;
+            let targetDistractors = Math.floor(Math.random() * 2) + 3;
+            let attempts = 0;
+            while(placedDistractor < targetDistractors && attempts < 200) {
+                attempts++;
+                let rx = Math.floor(Math.random()*(SIZE-2))+1;
+                let ry = Math.floor(Math.random()*(SIZE-2))+1;
+                const onPath = state.solutionPath.some(p => p.x === rx && p.y === ry);
+                if(state.maze[ry][rx] === 0 && !onPath && (rx !== 1 || ry !== 1)) {
+                    state.maze[ry][rx] = 4; 
+                    placedDistractor++;
                 }
             }
 
-            state.maze[1][1] = 4; state.maze[end.y][end.x] = 3;
+            state.maze[SIZE-2][SIZE-2] = 3; 
             state.questionsSolved = 0;
-            state.player = {x: 1, y: 1};
-            renderChecklist();
+            state.player = {x:1, y:1};
+            updateChecklist();
+            draw();
         }
 
         function draw() {
             ctx.clearRect(0,0,canvas.width,canvas.height);
-            for(let y=0; y<MAZE_SIZE; y++){
-                for(let x=0; x<MAZE_SIZE; x++){
+            for(let y=0; y<SIZE; y++) {
+                for(let x=0; x<SIZE; x++) {
                     const cell = state.maze[y][x];
-                    const px = x*TILE_SIZE, py = y*TILE_SIZE;
-                    if(cell === 1) {
-                        ctx.fillStyle = "#0f172a"; ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
-                        ctx.strokeStyle = "#1e293b"; ctx.strokeRect(px+4, py+4, TILE_SIZE-8, TILE_SIZE-8);
-                    } else {
-                        ctx.fillStyle = "#ffffff"; ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+                    if(cell === 1) { 
+                        ctx.fillStyle = "#1e293b"; 
+                        ctx.fillRect(x*TILE, y*TILE, TILE, TILE); 
                     }
-                    if(cell === 4) { ctx.fillStyle = "#2563eb"; ctx.fillRect(px+2, py+2, TILE_SIZE-4, TILE_SIZE-4); }
-                    if(cell === 3) { ctx.fillStyle = state.questionsSolved >= state.totalRequired ? "#10b981" : "#475569"; ctx.fillRect(px+2, py+2, TILE_SIZE-4, TILE_SIZE-4); }
-                    if(cell === 2 || cell === 5) { 
-                        ctx.fillStyle = "#f59e0b"; ctx.beginPath(); ctx.arc(px+TILE_SIZE/2, py+TILE_SIZE/2, TILE_SIZE/3, 0, Math.PI*2); ctx.fill();
-                        ctx.font = "bold 10px Arial"; ctx.fillStyle="white"; ctx.textAlign="center"; ctx.fillText("Rx", px+TILE_SIZE/2, py+TILE_SIZE/2+4);
+                    if(cell === 2 || cell === 4) { 
+                        ctx.fillStyle = "#fbbf24"; 
+                        ctx.beginPath(); ctx.arc(x*TILE+TILE/2, y*TILE+TILE/2, TILE/2.5, 0, Math.PI*2); ctx.fill();
+                        ctx.fillStyle = "black"; ctx.font = "bold 10px sans-serif"; ctx.textAlign = "center";
+                        ctx.fillText("RX", x*TILE+TILE/2, y*TILE+TILE/2+4);
+                    }
+                    if(cell === 3) {
+                        ctx.fillStyle = state.questionsSolved >= 6 ? "#10b981" : "#334155";
+                        ctx.fillRect(x*TILE+2, y*TILE+2, TILE-4, TILE-4);
+                        ctx.fillStyle = "white"; ctx.font = "bold 8px sans-serif"; ctx.textAlign = "center";
+                        ctx.fillText("MED", x*TILE+TILE/2, y*TILE+TILE/2);
+                        ctx.fillText("ROOM", x*TILE+TILE/2, y*TILE+TILE/2+9);
                     }
                 }
             }
-            ctx.fillStyle = "#f43f5e"; ctx.shadowBlur = 10; ctx.shadowColor = "rgba(244, 63, 94, 0.6)";
-            ctx.beginPath(); ctx.arc(state.player.x*TILE_SIZE+TILE_SIZE/2, state.player.y*TILE_SIZE+TILE_SIZE/2, TILE_SIZE/3.5, 0, Math.PI*2); ctx.fill();
-            ctx.shadowBlur = 0;
+            ctx.fillStyle = "#f43f5e";
+            ctx.beginPath(); ctx.arc(state.player.x*TILE+TILE/2, state.player.y*TILE+TILE/2, TILE/3.5, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
         }
 
-        function handleKey(key) {
-            if(document.querySelector('.modal.active')) return;
+        function handleMove(key) {
             let dx=0, dy=0;
-            if(key==='ArrowUp' || key==='w') dy=-1; 
-            if(key==='ArrowDown' || key==='s') dy=1; 
-            if(key==='ArrowLeft' || key==='a') dx=-1; 
-            if(key==='ArrowRight' || key==='d') dx=1;
+            if(key === 'ArrowUp') dy = -1;
+            if(key === 'ArrowDown') dy = 1;
+            if(key === 'ArrowLeft') dx = -1;
+            if(key === 'ArrowRight') dx = 1;
             const nx = state.player.x + dx, ny = state.player.y + dy;
-            if(nx >= 0 && nx < MAZE_SIZE && ny >= 0 && ny < MAZE_SIZE) {
-                const t = state.maze[ny][nx];
-                if(t !== 1) {
-                    if(t === 3 && state.questionsSolved < state.totalRequired) return;
-                    state.player = {x: nx, y: ny};
-                    if(t === 2 || t === 5) openQuiz(nx, ny, t);
-                    if(t === 3) openFinale();
-                }
+            if(nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE && state.maze[ny][nx] !== 1) {
+                if(state.maze[ny][nx] === 3 && state.questionsSolved < 6) return;
+                state.player = {x:nx, y:ny};
+                if(state.maze[ny][nx] === 2) triggerQuiz(nx, ny, true);
+                if(state.maze[ny][nx] === 4) triggerQuiz(nx, ny, false);
+                if(state.maze[ny][nx] === 3) triggerFinale();
             }
             draw();
         }
 
-        function renderChecklist() {
-            const c = document.getElementById('checklist-container'); c.innerHTML = "";
+        function triggerQuiz(x, y, isPrimary) {
+            state.activeGate = {x, y, isPrimary};
+            const banks = [BANK.PO, BANK.IV_VAR, BANK.IV_RATE, BANK.IV_GTT, BANK.IV_KG];
+            const activeBank = banks[Math.min(banks.length-1, state.level-1)];
+            const q = activeBank[Math.floor(Math.random()*activeBank.length)];
+            state.currentQ = q;
+            document.getElementById('q-header').innerText = isPrimary ? "PRIMARY RX" : "DISTRACTOR RX";
+            document.getElementById('q-text').innerText = q.q;
+            document.getElementById('q-unit').innerText = q.unit;
+            document.getElementById('q-input').value = "";
+            document.getElementById('q-feedback').innerText = "";
+            document.getElementById('quiz-modal').classList.add('active');
+        }
+
+        function submitQuiz() {
+            const val = parseFloat(document.getElementById('q-input').value);
+            if(Math.abs(val - state.currentQ.a) < 0.1) {
+                if(state.activeGate.isPrimary) state.questionsSolved++;
+                state.maze[state.activeGate.y][state.activeGate.x] = 0;
+                document.getElementById('quiz-modal').classList.remove('active');
+                updateChecklist();
+                draw();
+            } else {
+                const f = document.getElementById('q-feedback');
+                f.innerText = "Check math!"; f.style.color = "red";
+            }
+        }
+
+        function updateChecklist() {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = "";
             for(let i=1; i<=6; i++) {
-                const done = i <= state.questionsSolved;
                 const div = document.createElement('div');
-                div.className = `checklist-item ${done ? 'checklist-done' : 'checklist-todo'}`;
-                div.innerHTML = `<span>${done?'✅':'⚪'}</span> Protocol Verification #${i}`;
-                c.appendChild(div);
+                div.className = "checklist-item";
+                div.innerHTML = `<span class="${i<=state.questionsSolved?'text-emerald-500':'text-slate-200'}">${i<=state.questionsSolved?'●':'○'}</span> RX Gate ${i}`;
+                container.appendChild(div);
             }
             document.getElementById('progress-count').innerText = `${state.questionsSolved} / 6`;
         }
 
-        function openQuiz(x, y, type) {
-            state.activeGate = { x, y, type };
-            const floorConfig = FLOOR_CONFIG[state.level];
-            let q; do { q = ALL_QUESTIONS[Math.floor(Math.random()*ALL_QUESTIONS.length)]; } while (!floorConfig.cats.includes(q.cat) || state.usedQuestions.has(q.q));
-            state.currentQ = q; state.usedQuestions.add(q.q);
-            document.getElementById('q-text').innerText = q.q;
-            document.getElementById('q-unit').innerText = categories[q.cat].unit;
-            document.getElementById('q-input').value = "";
-            document.getElementById('q-feedback').innerText = "";
-            document.getElementById('quiz-modal').classList.add('active');
-            setTimeout(() => document.getElementById('q-input').focus(), 100);
-        }
-
-        function submitDose() {
-            const v = parseFloat(document.getElementById('q-input').value);
-            if(Math.abs(v - state.currentQ.a) < 0.05) {
-                if(state.activeGate.type === 2) { state.questionsSolved++; renderChecklist(); }
-                state.maze[state.activeGate.y][state.activeGate.x] = 0;
-                document.getElementById('quiz-modal').classList.remove('active');
-                draw();
-            } else {
-                document.getElementById('q-feedback').innerText = "CALCULATION ERROR";
-                document.getElementById('q-feedback').style.color = "#e11d48";
-            }
-        }
-
-        function openFinale() {
-            const f = levelThemes[state.level].finale;
-            state.targetVal = f.ans;
-            state.currentVal = 0;
-            document.getElementById('active-measure-label').innerText = `0.0 ${f.unit}`;
-            document.getElementById('finale-math-q').innerText = f.q;
+        function triggerFinale() {
+            state.targetVal = 2.5; 
+            document.getElementById('finale-math-q').innerText = "Draw 2.5 mL of Morphine IV.";
             const area = document.getElementById('equipment-visual-area');
             area.innerHTML = "";
-
-            if(f.type === 'cup' || f.type === 'syringe') {
-                const eq = document.createElement('div');
-                eq.className = f.type === 'cup' ? 'cup-barrel' : 'syringe-barrel';
-                const fill = document.createElement('div');
-                fill.className = "absolute bg-blue-500/60 border-t-4 border-blue-400 pointer-events-none transition-all";
-                
-                const updateMeasure = (e) => {
-                    const r = eq.getBoundingClientRect();
-                    if(f.type==='cup') {
-                        const h = 100 - Math.min(100, Math.max(0, (e.clientY - r.top)/r.height * 100));
-                        fill.style.bottom = "0"; fill.style.width="100%"; fill.style.height = h + '%';
-                        state.currentVal = (h/2.5).toFixed(1);
-                    } else {
-                        const w = Math.min(100, Math.max(0, (e.clientX - r.left)/r.width * 100));
-                        fill.style.left = "0"; fill.style.height="100%"; fill.style.width = w + '%';
-                        state.currentVal = (w/10).toFixed(2);
-                    }
-                    document.getElementById('active-measure-label').innerText = `${state.currentVal} ${f.unit}`;
+            const syringe = document.createElement('div'); syringe.className = "syringe-barrel mx-auto";
+            const plunger = document.createElement('div');
+            plunger.className = "absolute bg-blue-500/50 border-r-4 border-blue-600 h-full pointer-events-none";
+            
+            syringe.onmousedown = (e) => {
+                const move = (ev) => {
+                    const rect = syringe.getBoundingClientRect();
+                    const pct = Math.min(100, Math.max(0, (ev.clientX - rect.left)/rect.width * 100));
+                    plunger.style.width = pct + "%";
+                    state.currentVal = (pct / 10).toFixed(1);
+                    document.getElementById('active-measure-label').innerText = state.currentVal + " mL";
                 };
-
-                eq.onmousedown = (e) => {
-                    updateMeasure(e);
-                    window.onmousemove = updateMeasure;
-                    window.onmouseup = () => window.onmousemove = null;
-                };
-
-                eq.appendChild(fill); area.appendChild(eq);
-                document.getElementById('active-measure-label').classList.remove('hidden');
-            } else {
-                const p = document.createElement('div'); p.className = "iv-pump-chassis";
-                p.innerHTML = `<div class="bg-slate-900 p-4 rounded-xl mb-4 border-2 border-slate-700 shadow-inner text-center"><p class="text-[8px] text-blue-400 uppercase font-black">RATE ${f.unit}</p><p id="pump-display" class="text-white text-3xl font-mono">0.0</p></div><div class="grid grid-cols-3 gap-2">${[1,2,3,4,5,6,7,8,9,0,'.','C'].map(k=>`<button onclick="pumpKey('${k}', '${f.unit}')" class="bg-white p-3 rounded-xl font-bold text-slate-800 border-2 border-slate-300 shadow-sm">${k}</button>`).join('')}</div>`;
-                area.appendChild(p); state.currentVal = "0";
-                document.getElementById('active-measure-label').classList.add('hidden');
-            }
+                move(e); window.onmousemove = move;
+                window.onmouseup = () => window.onmousemove = null;
+            };
+            syringe.appendChild(plunger);
+            area.appendChild(syringe);
+            document.getElementById('case-modal').classList.add('active');
             document.getElementById('finale-step-1').classList.remove('hidden');
             document.getElementById('finale-step-2').classList.add('hidden');
-            document.getElementById('case-modal').classList.add('active');
         }
 
-        function pumpKey(k, unit) {
-            if(k==='C') state.currentVal = "0"; else if(state.currentVal==="0") state.currentVal=k; else state.currentVal+=k;
-            document.getElementById('pump-display').innerText = state.currentVal;
-            document.getElementById('active-measure-label').innerText = `${state.currentVal} ${unit}`;
-        }
-
-        function verifyFinaleAction() {
-            if(Math.abs(parseFloat(state.currentVal) - state.targetVal) < 1) {
+        function verifyFinaleDose() {
+            if(Math.abs(state.currentVal - state.targetVal) < 0.2) {
                 document.getElementById('finale-step-1').classList.add('hidden');
                 loadNCLEX();
-            } else {
-                const msg = document.getElementById('active-measure-label');
-                msg.innerText = "DOSE ERROR!"; msg.style.color = "#f43f5e";
-                setTimeout(() => { msg.style.color = "white"; }, 1000);
             }
         }
 
         function loadNCLEX() {
-            const b = document.getElementById('nclex-options'); b.innerHTML = "";
+            const data = SCENARIOS[state.level] || SCENARIOS[1];
+            document.getElementById('nclex-q').innerText = data.nclex.q;
+            const options = document.getElementById('nclex-options');
+            options.innerHTML = "";
             document.getElementById('nclex-rationale').classList.add('hidden');
-            const qSet = nclexQuestions[Math.floor(Math.random()*nclexQuestions.length)];
-            document.getElementById('nclex-q').innerText = qSet.q;
-            
-            qSet.options.forEach(o => {
+            data.nclex.options.forEach(o => {
                 const btn = document.createElement('button');
-                btn.className = "w-full text-left p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-base font-bold shadow-sm flex items-start gap-4";
-                btn.innerHTML = `<span>${o.t.split('.')[0]}.</span> <span>${o.t.split('. ')[1]}</span>`;
+                btn.className = "w-full text-left p-4 bg-white border border-slate-200 rounded-xl hover:border-blue-500 font-bold transition-all text-sm";
+                btn.innerText = o.t;
                 btn.onclick = () => {
                     document.getElementById('nclex-rationale').classList.remove('hidden');
-                    document.getElementById('rationale-text').innerHTML = `<span class="${o.c ? 'text-emerald-600' : 'text-rose-600'} font-black uppercase text-xs mb-2 block">${o.c ? 'Correct' : 'Incorrect'} Response</span> ${o.r}`;
-                    document.getElementById('finale-continue').onclick = () => {
-                        if(!o.c) return;
+                    document.getElementById('rationale-text').innerHTML = `<span class="${o.c?'text-emerald-600':'text-rose-600'} uppercase font-black text-[10px] block mb-1">${o.c?'Correct':'Incorrect'}</span> ${o.r}`;
+                    const nextBtn = document.getElementById('finale-next');
+                    nextBtn.disabled = !o.c;
+                    nextBtn.style.opacity = o.c ? "1" : "0.3";
+                    nextBtn.onclick = () => {
                         document.getElementById('case-modal').classList.remove('active');
-                        state.level++; if(state.level > 5) state.level = 1;
-                        updateFloorUI(); generateMaze(); draw();
+                        state.level++; 
+                        if(state.level > 3) state.level = 1;
+                        document.getElementById('level-display').innerText = "FLOOR " + state.level;
+                        document.getElementById('unit-name').innerText = SCENARIOS[state.level]?.name || "Specialty Unit";
+                        document.getElementById('floor-specialty').innerText = "Focus: " + (SCENARIOS[state.level]?.specialty || "Calculations");
+                        generateMaze();
                     };
-                    document.getElementById('finale-continue').className = o.c ? "mt-8 w-full bg-slate-900 py-5 rounded-2xl text-white font-black text-lg uppercase tracking-widest hover:bg-black" : "mt-8 w-full bg-slate-300 py-5 rounded-2xl text-slate-500 font-black text-lg uppercase tracking-widest cursor-not-allowed";
-                    document.getElementById('finale-continue').innerText = o.c ? "Clock Out & Proceed" : "Re-read and Select Correct Answer";
                 };
-                b.appendChild(btn);
+                options.appendChild(btn);
             });
             document.getElementById('finale-step-2').classList.remove('hidden');
         }
 
-        function updateFloorUI() {
-            const cfg = FLOOR_CONFIG[state.level];
-            document.getElementById('level-display').innerText = `FLOOR ${state.level}`;
-            document.getElementById('unit-name').innerText = cfg.name;
-            document.getElementById('floor-specialty').innerText = `Focus: ${cfg.specialty}`;
-        }
-
-        function calcPress(v) { state.calcValue==='0'?state.calcValue=v:state.calcValue+=v; document.getElementById('calc-display').innerText=state.calcValue; }
-        function calcClear() { state.calcValue='0'; document.getElementById('calc-display').innerText='0'; }
-        function calcEval() { try{ state.calcValue = Number(eval(state.calcValue).toFixed(3)).toString(); }catch{state.calcValue="Err";} document.getElementById('calc-display').innerText=state.calcValue; }
-
-        window.addEventListener('keydown', e => handleKey(e.key));
-        window.onload = () => { updateFloorUI(); generateMaze(); draw(); };
+        window.onkeydown = (e) => handleMove(e.key);
+        window.onload = () => { initBanks(); generateMaze(); };
     </script>
 </body>
 </html>
