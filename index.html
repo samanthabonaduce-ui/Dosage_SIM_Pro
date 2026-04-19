@@ -175,7 +175,7 @@
                 <div id="quiz-card" class="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="w-2 h-2 rounded-full bg-blue-600"></div>
-                        <span class="text-[10px] font-black uppercase text-slate-400">Order Verification</span>
+                        <span id="q-category" class="text-[10px] font-black uppercase text-slate-400">Order Verification</span>
                     </div>
                     <p id="q-text" class="text-lg font-bold text-slate-800 leading-tight mb-6"></p>
                     <div class="space-y-4">
@@ -228,14 +228,10 @@
 
             <div class="p-5 bg-blue-50 border border-blue-100 rounded-xl mb-6">
                 <h4 class="text-[10px] font-black text-blue-600 uppercase mb-3 tracking-widest">Clinical Guidelines</h4>
-                <ul class="text-[11px] text-blue-700 font-bold leading-relaxed space-y-2">
+                <ul id="guideline-list" class="text-[11px] text-blue-700 font-bold leading-relaxed space-y-2">
                     <li class="flex gap-2">
                         <span>•</span>
                         <span>Navigate to each yellow station on the critical path to verify medication orders.</span>
-                    </li>
-                    <li class="flex gap-2">
-                        <span>•</span>
-                        <span>Resolve 6 orders to unlock the Med Room.</span>
                     </li>
                 </ul>
             </div>
@@ -259,8 +255,10 @@
     <script>
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
-        const TILE = 40; const SIZE = 15;
-        canvas.width = TILE * SIZE; canvas.height = TILE * SIZE;
+        const TILE = 40; 
+        const SIZE_H = 15;
+        const SIZE_W = 21;
+        canvas.width = TILE * SIZE_W; canvas.height = TILE * SIZE_H;
 
         let state = {
             level: 1, maze: [], player: {x:1, y:1}, solved: 0,
@@ -270,18 +268,37 @@
         };
 
         const BANK = [
-            { q: "Order: Digoxin 0.125 mg IV Push. Supply: 0.25 mg/mL. How many mL?", a: 0.5, u: "mL" },
-            { q: "Order: Heparin 5,000 Units SQ. Supply: 10,000 Units/mL. How many mL?", a: 0.5, u: "mL" },
-            { q: "Order: Morphine 4 mg IV Push. Supply: 10 mg/mL. How many mL?", a: 0.4, u: "mL" },
-            { q: "Order: Furosemide 40 mg IV Push. Supply: 10 mg/mL. How many mL?", a: 4, u: "mL" },
-            { q: "Order: Metoprolol 25 mg PO. Supply: 50 mg tablets. How many tabs?", a: 0.5, u: "TABS" },
-            { q: "Order: Amoxicillin 500 mg PO. Supply: 250 mg/5 mL. How many mL?", a: 10, u: "mL" },
-            { q: "Order: Hydromorphone 0.5 mg IV. Supply: 2 mg/mL. How many mL?", a: 0.25, u: "mL" },
-            { q: "Order: Ondansetron 4 mg IV. Supply: 2 mg/mL. How many mL?", a: 2, u: "mL" },
-            { q: "Order: Lisinopril 10 mg PO. Supply: 20 mg tablets. How many tabs?", a: 0.5, u: "TABS" },
-            { q: "Order: Potassium Chloride 20 mEq PO. Supply: 10 mEq/5 mL. How many mL?", a: 10, u: "mL" },
-            { q: "Order: Prednisone 10 mg PO. Supply: 5 mg tablets. How many tabs?", a: 2, u: "TABS" },
-            { q: "Order: Epinephrine 0.3 mg IM. Supply: 1 mg/mL. How many mL?", a: 0.3, u: "mL" }
+            // Floor 1: PO, SQ, IM
+            { floor: 1, q: "Order: Metoprolol 25 mg PO. Supply: 50 mg tablets. How many tabs?", a: 0.5, u: "TABS", type: "PO" },
+            { floor: 1, q: "Order: Heparin 5,000 Units SQ. Supply: 10,000 Units/mL. How many mL?", a: 0.5, u: "mL", type: "SQ" },
+            { floor: 1, q: "Order: Epinephrine 0.3 mg IM. Supply: 1 mg/mL. How many mL?", a: 0.3, u: "mL", type: "IM" },
+            { floor: 1, q: "Order: Prednisone 10 mg PO. Supply: 5 mg tablets. How many tabs?", a: 2, u: "TABS", type: "PO" },
+            { floor: 1, q: "Order: Amoxicillin 500 mg PO. Supply: 250 mg/5 mL. How many mL?", a: 10, u: "mL", type: "PO" },
+            
+            // Floor 2: IV Push
+            { floor: 2, q: "Order: Digoxin 0.125 mg IV Push. Supply: 0.25 mg/mL. How many mL?", a: 0.5, u: "mL", type: "IVP" },
+            { floor: 2, q: "Order: Morphine 4 mg IV Push. Supply: 10 mg/mL. How many mL?", a: 0.4, u: "mL", type: "IVP" },
+            { floor: 2, q: "Order: Furosemide 40 mg IV Push. Supply: 10 mg/mL. How many mL?", a: 4, u: "mL", type: "IVP" },
+            { floor: 2, q: "Order: Hydromorphone 0.5 mg IV Push. Supply: 2 mg/mL. How many mL?", a: 0.25, u: "mL", type: "IVP" },
+            { floor: 2, q: "Order: Ondansetron 4 mg IV Push. Supply: 2 mg/mL. How many mL?", a: 2, u: "mL", type: "IVP" },
+
+            // Floor 3: IV mL/hr
+            { floor: 3, q: "Order: 1,000 mL NS to infuse over 8 hours. What is the mL/hr rate?", a: 125, u: "mL/hr", type: "INF" },
+            { floor: 3, q: "Order: 500 mL D5W to infuse over 4 hours. What is the mL/hr rate?", a: 125, u: "mL/hr", type: "INF" },
+            { floor: 3, q: "Order: Vancomycin 1g in 250 mL NS to infuse over 2 hours. What is the mL/hr rate?", a: 125, u: "mL/hr", type: "INF" },
+            { floor: 3, q: "Order: Ciprofloxacin 400mg in 200 mL to infuse over 60 min. What is the mL/hr rate?", a: 200, u: "mL/hr", type: "INF" },
+
+            // Floor 4: IV gtt/min
+            { floor: 4, q: "Order: 100 mL NS over 30 min. Tubing drop factor: 15 gtt/mL. Calculate gtt/min.", a: 50, u: "gtt/min", type: "DRIP" },
+            { floor: 4, q: "Order: 1,000 mL LR over 10 hours. Drop factor: 10 gtt/mL. Calculate gtt/min.", a: 17, u: "gtt/min", type: "DRIP" },
+            { floor: 4, q: "Order: 50 mL antibiotic over 20 min. Drop factor: 60 gtt/mL (microdrip). Calculate gtt/min.", a: 150, u: "gtt/min", type: "DRIP" },
+            { floor: 4, q: "Order: 250 mL NS over 2 hours. Drop factor: 20 gtt/mL. Calculate gtt/min.", a: 42, u: "gtt/min", type: "DRIP" },
+
+            // Floor 6: IV per kg
+            { floor: 6, q: "Order: Dopamine 5 mcg/kg/min. Patient weight: 80 kg. Supply: 400 mg/250 mL. What is the mcg/min dose?", a: 400, u: "mcg/min", type: "WBT" },
+            { floor: 6, q: "Order: Heparin 18 units/kg/hr. Patient weight: 70 kg. Supply: 25,000 units/500 mL. Calculate units/hr.", a: 1260, u: "units/hr", type: "WBT" },
+            { floor: 6, q: "Order: Propofol 10 mcg/kg/min. Patient weight: 100 kg. What is the mcg/min dose?", a: 1000, u: "mcg/min", type: "WBT" },
+            { floor: 6, q: "Order: Dobutamine 2.5 mcg/kg/min. Patient weight: 60 kg. What is the mcg/min dose?", a: 150, u: "mcg/min", type: "WBT" }
         ];
 
         function findPath(start, end) {
@@ -294,7 +311,7 @@
                 if(node.x === end.x && node.y === end.y) return path;
                 [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx, dy]) => {
                     let nx = node.x + dx, ny = node.y + dy;
-                    if(nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE && state.maze[ny][nx] !== 1 && !visited.has(`${nx},${ny}`)) {
+                    if(nx >= 0 && nx < SIZE_W && ny >= 0 && ny < SIZE_H && state.maze[ny][nx] !== 1 && !visited.has(`${nx},${ny}`)) {
                         visited.add(`${nx},${ny}`);
                         queue.push([...path, {x: nx, y: ny}]);
                     }
@@ -304,13 +321,13 @@
         }
 
         function initMaze() {
-            state.maze = Array(SIZE).fill().map(() => Array(SIZE).fill(1));
+            state.maze = Array(SIZE_H).fill().map(() => Array(SIZE_W).fill(1));
             const stack = [{x:1, y:1}];
             state.maze[1][1] = 0;
             while(stack.length) {
                 const c = stack[stack.length-1];
                 const ns = [[0,2],[0,-2],[2,0],[-2,0]].map(([dx,dy])=>({x:c.x+dx, y:c.y+dy, mx:c.x+dx/2, my:c.y+dy/2}))
-                    .filter(n => n.x>0 && n.x<SIZE-1 && n.y>0 && n.y<SIZE-1 && state.maze[n.y][n.x]===1);
+                    .filter(n => n.x>0 && n.x<SIZE_W-1 && n.y>0 && n.y<SIZE_H-1 && state.maze[n.y][n.x]===1);
                 if(ns.length) {
                     const n = ns[Math.floor(Math.random()*ns.length)];
                     state.maze[n.y][n.x] = 0; state.maze[n.my][n.mx] = 0;
@@ -318,7 +335,7 @@
                 } else stack.pop();
             }
 
-            const criticalPath = findPath({x:1, y:1}, {x:SIZE-2, y:SIZE-2});
+            const criticalPath = findPath({x:1, y:1}, {x:SIZE_W-2, y:SIZE_H-2});
             state.gates = [];
 
             let pathOptions = criticalPath.slice(2, -2).sort(() => Math.random() - 0.5);
@@ -334,8 +351,8 @@
 
             let pathSet = new Set(criticalPath.map(p => `${p.x},${p.y}`));
             let offPathOptions = [];
-            for(let y=0; y<SIZE; y++) {
-                for(let x=0; x<SIZE; x++) {
+            for(let y=0; y<SIZE_H; y++) {
+                for(let x=0; x<SIZE_W; x++) {
                     if(state.maze[y][x] === 0 && !pathSet.has(`${x},${y}`)) offPathOptions.push({x, y});
                 }
             }
@@ -350,7 +367,7 @@
                 }
             }
 
-            state.maze[SIZE-2][SIZE-2] = 3; 
+            state.maze[SIZE_H-2][SIZE_W-2] = 3; 
             state.maze[1][1] = 6; 
             state.solved = 0; state.player = {x:1, y:1};
             updateUI(); draw();
@@ -358,8 +375,8 @@
 
         function draw() {
             ctx.clearRect(0,0,canvas.width,canvas.height);
-            for(let y=0; y<SIZE; y++) {
-                for(let x=0; x<SIZE; x++) {
+            for(let y=0; y<SIZE_H; y++) {
+                for(let x=0; x<SIZE_W; x++) {
                     const cell = state.maze[y][x];
                     const px = x*TILE; const py = y*TILE;
 
@@ -402,7 +419,7 @@
         function move(dx, dy) {
             if(!state.active) return;
             const nx = state.player.x + dx, ny = state.player.y + dy;
-            if(nx>=0 && nx<SIZE && ny>=0 && ny<SIZE && state.maze[ny][nx] !== 1) {
+            if(nx>=0 && nx<SIZE_W && ny>=0 && ny<SIZE_H && state.maze[ny][nx] !== 1) {
                 if(state.maze[ny][nx] === 3 && state.solved < 6) return;
                 state.player = {x:nx, y:ny};
                 if(state.maze[ny][nx] === 2 || state.maze[ny][nx] === 5) openQuiz(nx, ny, state.maze[ny][nx]);
@@ -414,7 +431,15 @@
         function openQuiz(x, y, type) {
             state.active = false; 
             state.activeCell = {x, y, type};
-            state.currentQ = BANK[Math.floor(Math.random()*BANK.length)];
+            
+            // Filter bank based on current level rules
+            let possibleQs = BANK.filter(q => q.floor === state.level);
+            // Fallback for Floor 5 (Mixed) or if no specific floor rules exist
+            if(possibleQs.length === 0) possibleQs = BANK;
+
+            state.currentQ = possibleQs[Math.floor(Math.random()*possibleQs.length)];
+            
+            document.getElementById('q-category').innerText = `Verification: ${state.currentQ.type}`;
             document.getElementById('q-text').innerText = state.currentQ.q;
             document.getElementById('q-unit').innerText = state.currentQ.u;
             document.getElementById('q-input').value = "";
@@ -434,8 +459,8 @@
                 return;
             }
 
-            if(Math.abs(val - state.currentQ.a) < 0.01) {
-                // Correct answer
+            // Margin of error for rounding differences
+            if(Math.abs(val - state.currentQ.a) < 1.01) {
                 if(state.activeCell.type === 2) {
                     state.solved++;
                 }
@@ -444,7 +469,6 @@
                 updateUI(); 
                 draw();
             } else {
-                // Incorrect answer - shake effect
                 feedback.innerText = "INCORRECT DOSAGE";
                 feedback.className = "mt-4 text-center text-[10px] font-bold uppercase h-4 text-red-500";
                 card.classList.add('shake');
@@ -524,6 +548,22 @@
                     </div>
                 `;
             }
+
+            // Update Guidelines text based on floor
+            const guideList = document.getElementById('guideline-list');
+            let floorDesc = "Complete the medication orders for this floor.";
+            switch(state.level) {
+                case 1: floorDesc = "Floor Focus: PO (Oral), SQ (Subcutaneous), and IM (Intramuscular) doses."; break;
+                case 2: floorDesc = "Floor Focus: IV Push (IVP) medication calculations."; break;
+                case 3: floorDesc = "Floor Focus: IV Infusion (mL/hr) calculations."; break;
+                case 4: floorDesc = "Floor Focus: IV Drip Rates (gtt/min) using gravity tubing."; break;
+                case 5: floorDesc = "Floor Focus: Mixed Clinical Modalities (Review Floor)."; break;
+                case 6: floorDesc = "Floor Focus: Weight-based (per kg) IV calculations."; break;
+            }
+            guideList.innerHTML = `
+                <li class="flex gap-2"><span>•</span><span>${floorDesc}</span></li>
+                <li class="flex gap-2"><span>•</span><span>Navigate to yellow Rx stations on the critical path.</span></li>
+            `;
         }
 
         window.onkeydown = (e) => {
