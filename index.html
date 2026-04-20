@@ -703,7 +703,6 @@
             const data = FINALE_DATA[state.level];
             state.targetValue = data.a;
             state.currentValue = 0;
-            const maxCapacity = data.max || 100; // Fallback to 100 if undefined
             
             document.getElementById('finale-math-q').innerText = data.q;
             const container = document.getElementById('interactive-container');
@@ -722,7 +721,8 @@
                     const rect = cup.getBoundingClientRect();
                     const y = e.clientY - rect.top;
                     const percent = Math.max(0, Math.min(1, 1 - (y / rect.height)));
-                    state.currentValue = parseFloat((percent * maxCapacity).toFixed(1));
+                    const maxVal = FINALE_DATA[state.level].max || 60;
+                    state.currentValue = parseFloat((percent * maxVal).toFixed(1));
                     document.getElementById('cup-fluid').style.height = (percent * 100) + "%";
                     document.getElementById('draw-label').innerText = `Selected: ${state.currentValue} mL`;
                 };
