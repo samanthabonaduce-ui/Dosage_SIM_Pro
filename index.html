@@ -368,7 +368,7 @@
             selectedNclexIdx: -1
         };
 
-        const BANK = [
+         const BANK = [
             // FLOOR 1 - PO, SQ, IM
             { id: 101, floor: 1, q: "Order: Warfarin 7.5 mg PO. Supply: 5 mg tablets. How many tabs?", a: 1.5, u: "TABS", type: "PO" },
             { id: 102, floor: 1, q: "Order: Lisinopril 20 mg PO. Supply: 40 mg tablets. How many tabs?", a: 0.5, u: "TABS", type: "PO" },
@@ -731,7 +731,8 @@
                 document.getElementById('finale-tag').innerText = "Draw Medication";
                 const maxVal = data.max;
                 let marksHtml = "";
-                for(let i=0; i<=maxVal; i += maxVal/5) {
+                // Fixed: Correct logic for syringe marks
+                for(let i=0; i<=maxVal; i++) {
                     marksHtml += `<div class="mark" data-val="${i}"></div>`;
                 }
                 container.innerHTML = `
@@ -747,7 +748,8 @@
                     const rect = syringe.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const percent = Math.max(0, Math.min(1, x / rect.width));
-                    state.currentValue = parseFloat((percent * maxVal).toFixed(1));
+                    const currentMax = FINALE_DATA[state.level].max || 5;
+                    state.currentValue = parseFloat((percent * currentMax).toFixed(1));
                     document.getElementById('syringe-fluid').style.width = (percent * 100) + "%";
                     document.getElementById('draw-label').innerText = `Selected: ${state.currentValue} mL`;
                 };
