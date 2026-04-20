@@ -296,7 +296,7 @@
 
             <div class="flex-1">
                 <div class="flex justify-between items-end mb-4">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order Verification</h3>
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order</h3>
                     <span id="progress-val" class="text-xs font-bold text-blue-600">0 / 6 Complete</span>
                 </div>
                 <div id="checklist-container"></div>
@@ -334,6 +334,20 @@
             <div id="nclex-options" class="grid gap-3 mb-8"></div>
             <p id="nclex-feedback" class="text-center text-xs font-bold uppercase mb-4 h-4"></p>
             <button id="nclex-submit" onclick="checkFinalStage2()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold text-sm uppercase tracking-widest">Submit Answer</button>
+        </div>
+
+        <div id="congrats-stage" class="bg-white rounded-[32px] p-12 max-w-2xl w-full hidden text-center">
+            <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-black mb-4 text-slate-900">Mission Complete!</h2>
+            <p class="text-slate-600 mb-10 text-xl font-semibold leading-relaxed">
+                Congratulations, you complete the DosageSIM Maze, you have mastered your clinical dosage calculations!
+            </p>
+            <button onclick="location.reload()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold text-sm uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl">Restart Simulation</button>
         </div>
     </div>
 
@@ -694,6 +708,7 @@
             container.innerHTML = "";
             
             if(state.level === 1) {
+                // Transition Floor 1 to 2: CUP
                 document.getElementById('finale-tag').innerText = "Draw Medication";
                 container.innerHTML = `
                     <div id="draw-label" class="mb-4 bg-slate-900 text-white px-4 py-1 rounded-full font-bold text-sm">Selected: 0 mL</div>
@@ -710,7 +725,7 @@
                     document.getElementById('draw-label').innerText = `Selected: ${state.currentValue} mL`;
                 };
             } else if (state.level === 2) {
-                // CHANGED: Floor 2 Challenge now uses a syringe
+                // Transition Floor 2 to 3: SYRINGE
                 document.getElementById('finale-tag').innerText = "Draw Medication";
                 const maxVal = data.max;
                 let marksHtml = "";
@@ -735,6 +750,7 @@
                     document.getElementById('draw-label').innerText = `Selected: ${state.currentValue} mL`;
                 };
             } else {
+                // Floors 3, 4, 5: IV PUMP
                 document.getElementById('finale-tag').innerText = state.level === 4 ? "Gravity Drip Setup" : "IV Infusion System";
                 container.innerHTML = `
                     <div class="pump-screen w-full max-w-xs text-center">
@@ -752,9 +768,9 @@
             document.getElementById('finale-modal').style.display = 'flex';
             document.getElementById('finale-stage-1').classList.remove('hidden');
             document.getElementById('finale-stage-2').classList.add('hidden');
+            document.getElementById('congrats-stage').classList.add('hidden');
         }
 
-        // RESET FUNCTION FOR SYRINGE
         function resetSyringe() {
             state.currentValue = 0;
             const fluid = document.getElementById('syringe-fluid');
@@ -804,15 +820,24 @@
             const feedback = document.getElementById('nclex-feedback');
             if(state.selectedNclexIdx === -1) return;
             if(state.selectedNclexIdx === data.a) {
-                document.getElementById('finale-modal').style.display = 'none';
-                state.level++; 
-                initMaze(); state.active = true;
+                if(state.level === 5) {
+                    showCongrats();
+                } else {
+                    document.getElementById('finale-modal').style.display = 'none';
+                    state.level++; 
+                    initMaze(); state.active = true;
+                }
             } else {
                 feedback.innerText = "INCORRECT CLINICAL CHOICE";
                 feedback.className = "text-center text-xs font-bold uppercase mb-4 h-4 text-red-500";
                 document.getElementById('finale-stage-2').classList.add('shake');
                 setTimeout(() => document.getElementById('finale-stage-2').classList.remove('shake'), 500);
             }
+        }
+
+        function showCongrats() {
+            document.getElementById('finale-stage-2').classList.add('hidden');
+            document.getElementById('congrats-stage').classList.remove('hidden');
         }
 
         function calcAction(val) {
