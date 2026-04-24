@@ -507,7 +507,7 @@
                 q: "Order: Morphine 2 mg IV every 4 hours as needed. Supply: 10 mg / 5 mL. How much do you draw into the syringe?", a: 1, u: "mL",
                 nclex: {
                     q: "What three concepts do you review prior to IV medication administration?",
-                    options: ["Dilution, Correct Dose, Allergies", "Compatibility, Dilution, Correct Medication", "Correct Medication, Order, and Supply", "Dilution, Compatibility, and Rate of Administration"],
+                    options: ["Dilution, Correct Dose, and Allergies", "Compatibility, Dilution, and Correct Medication", "Correct Medication, Order, and Supply", "Dilution, Compatibility, and Rate of Administration"],
                     a: 4
                 }
             },
@@ -815,10 +815,14 @@
             document.getElementById('finale-stage-1').classList.add('hidden');
             document.getElementById('finale-stage-2').classList.remove('hidden');
             document.getElementById('nclex-feedback').innerText = "";
+            state.selectedNclexIdx = -1; // Reset selection for fresh question
         }
 
         function checkFinalStage2() {
-            if(state.selectedNclexIdx === FINALE_DATA[state.level].nclex.a) {
+            if(state.selectedNclexIdx === -1) return; // Must select something
+
+            const correctIdx = FINALE_DATA[state.level].nclex.a;
+            if(state.selectedNclexIdx === correctIdx) {
                 if(state.level === 5) {
                     document.getElementById('finale-stage-2').classList.add('hidden');
                     document.getElementById('congrats-stage').classList.remove('hidden');
