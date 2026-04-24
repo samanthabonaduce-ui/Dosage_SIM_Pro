@@ -31,7 +31,7 @@
             grid-template-columns: 1fr 320px;
             flex: 1;
             min-height: 0;
-            height: calc(100vh - 80px); /* Ensure container fills height */
+            height: calc(100vh - 80px);
         }
 
         #viewport {
@@ -50,10 +50,12 @@
             background: white; 
             border-radius: 12px; 
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            max-width: 100%;
-            max-height: 85%;
+            /* Force the canvas to be visible and sized correctly */
             width: auto;
             height: auto;
+            max-width: 100%;
+            max-height: 85%;
+            display: block;
         }
 
         .sidebar {
@@ -347,9 +349,6 @@
         const TILE = 42; 
         const SIZE_H = 15;
         const SIZE_W = 21;
-        
-        canvas.width = TILE * SIZE_W; 
-        canvas.height = TILE * SIZE_H;
 
         let state = {
             level: 1, maze: [], player: {x:1, y:1}, solved: 0,
@@ -540,6 +539,13 @@
             }
         };
 
+        function resizeCanvas() {
+            // Force exact size to prevent "little box"
+            canvas.width = TILE * SIZE_W;
+            canvas.height = TILE * SIZE_H;
+            draw();
+        }
+
         function initMaze() {
             state.maze = Array(SIZE_H).fill().map(() => Array(SIZE_W).fill(1));
             const stack = [{x:1, y:1}];
@@ -594,7 +600,7 @@
             state.player = {x:1, y:1};
             state.usedQuestionIds.clear();
             updateUI(); 
-            draw();
+            resizeCanvas();
         }
 
         function findPath(start, end) {
@@ -818,12 +824,11 @@
             document.getElementById('finale-stage-1').classList.add('hidden');
             document.getElementById('finale-stage-2').classList.remove('hidden');
             document.getElementById('nclex-feedback').innerText = "";
-            state.selectedNclexIdx = -1; // Reset selection for fresh question
+            state.selectedNclexIdx = -1;
         }
 
         function checkFinalStage2() {
-            if(state.selectedNclexIdx === -1) return; // Must select something
-
+            if(state.selectedNclexIdx === -1) return;
             const correctIdx = FINALE_DATA[state.level].nclex.a;
             if(state.selectedNclexIdx === correctIdx) {
                 if(state.level === 5) {
@@ -846,7 +851,12 @@
 
         window.onload = function() {
             initMaze();
+            // Re-draw once more to be sure layout is settled
+            setTimeout(resizeCanvas, 100);
         };
+        
+        // Ensure it handles window resize
+        window.onresize = resizeCanvas;
     </script>
 </body>
 </html>
