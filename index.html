@@ -168,16 +168,23 @@
         .nav-btn:hover { background: rgba(255,255,255,0.3); border-color: white; }
         .nav-btn:active { background: rgba(255,255,255,0.5); transform: scale(0.9); }
 
-        /* Finale UI Elements */
         .med-cup { width: 120px; height: 150px; background: rgba(255,255,255,0.2); border: 4px solid #cbd5e1; border-top: none; border-radius: 0 0 20px 20px; position: relative; cursor: pointer; overflow: hidden; }
         .cup-fluid { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(59, 130, 246, 0.6); transition: height 0.3s ease; }
         .syringe-container { width: 450px; height: 80px; position: relative; background: rgba(255,255,255,0.8); border: 2px solid #64748b; border-radius: 4px 40px 40px 4px; cursor: crosshair; box-shadow: inset 0 2px 10px rgba(0,0,0,0.1); }
         .syringe-fluid { height: 100%; background: rgba(59, 130, 246, 0.6); width: 0%; transition: width 0.2s ease; position: absolute; left: 0; top: 0; border-right: 4px solid #1e40af; z-index: 1; }
-        .syringe-marks { position: absolute; inset: 0; display: flex; justify-content: space-between; padding: 0; pointer-events: none; z-index: 2; }
-        .mark { width: 1px; height: 15px; background: #000; position: relative; }
-        .mark.major { width: 2px; height: 25px; }
-        .mark-label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: 800; color: #000; font-family: 'JetBrains Mono', monospace; }
         .pump-screen { background: #0f172a; border: 8px solid #334155; border-radius: 12px; padding: 20px; font-family: 'JetBrains Mono', monospace; color: #10b981; }
+
+        #finale-modal {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.95);
+            z-index: 150;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -244,6 +251,43 @@
                     <p id="q-feedback" class="mt-4 text-center text-[10px] font-bold uppercase h-4"></p>
                 </div>
             </div>
+
+            <div id="finale-modal">
+                <div id="finale-stage-1" class="bg-white rounded-[32px] p-10 max-w-2xl w-full">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span id="finale-tag" class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-[10px] font-black uppercase">Device Setup</span>
+                    </div>
+                    <h2 class="text-2xl font-black mb-2 text-slate-900">Med Room: Clinical Challenge</h2>
+                    <p id="finale-math-q" class="text-slate-600 mb-8 font-semibold text-lg"></p>
+                    <div id="interactive-container" class="bg-slate-100 rounded-2xl p-10 mb-8 relative border-2 border-slate-200 flex flex-col items-center justify-center min-h-[350px]"></div>
+                    <button onclick="checkFinalStage1()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold text-sm uppercase tracking-widest hover:shadow-lg transition-all">Verify Setup</button>
+                </div>
+
+                <div id="finale-stage-2" class="bg-white rounded-[32px] p-10 max-w-2xl w-full hidden">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-[10px] font-black uppercase">Clinical Judgement</span>
+                    </div>
+                    <h2 class="text-2xl font-black mb-2 text-slate-900">NCLEX Critical Thinking</h2>
+                    <p id="nclex-q-text" class="text-slate-600 mb-8 font-semibold text-lg leading-snug"></p>
+                    <div id="nclex-options" class="grid gap-3 mb-8"></div>
+                    <p id="nclex-feedback" class="text-center text-xs font-bold uppercase mb-4 h-4"></p>
+                    <button id="nclex-submit" onclick="checkFinalStage2()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold text-sm uppercase tracking-widest">Submit Answer</button>
+                </div>
+
+                <div id="congrats-stage" class="bg-white rounded-[32px] p-12 max-w-2xl w-full hidden text-center">
+                    <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
+                    <h2 class="text-3xl font-black mb-4 text-slate-900">Mission Complete!</h2>
+                    <p class="text-slate-600 mb-10 text-xl font-semibold leading-relaxed">
+                        Congratulations, you completed the DosageSIMPro Maze! You have mastered your clinical dosage calculations.
+                    </p>
+                    <button onclick="location.reload()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold text-sm uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl">Restart Simulation</button>
+                </div>
+            </div>
         </section>
 
         <aside class="sidebar">
@@ -292,43 +336,6 @@
                 </ul>
             </div>
         </aside>
-    </div>
-
-    <div id="finale-modal" class="fixed inset-0 bg-slate-900/95 z-[200] hidden items-center justify-center p-6 overflow-y-auto">
-        <div id="finale-stage-1" class="bg-white rounded-[32px] p-10 max-w-2xl w-full">
-            <div class="flex items-center gap-3 mb-4">
-                <span id="finale-tag" class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-[10px] font-black uppercase">Device Setup</span>
-            </div>
-            <h2 class="text-2xl font-black mb-2 text-slate-900">Med Room: Clinical Challenge</h2>
-            <p id="finale-math-q" class="text-slate-600 mb-8 font-semibold text-lg"></p>
-            <div id="interactive-container" class="bg-slate-100 rounded-2xl p-10 mb-8 relative border-2 border-slate-200 flex flex-col items-center justify-center min-h-[350px]"></div>
-            <button onclick="checkFinalStage1()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold text-sm uppercase tracking-widest hover:shadow-lg transition-all">Verify Setup</button>
-        </div>
-
-        <div id="finale-stage-2" class="bg-white rounded-[32px] p-10 max-w-2xl w-full hidden">
-            <div class="flex items-center gap-3 mb-4">
-                <span class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-[10px] font-black uppercase">Clinical Judgement</span>
-            </div>
-            <h2 class="text-2xl font-black mb-2 text-slate-900">NCLEX Critical Thinking</h2>
-            <p id="nclex-q-text" class="text-slate-600 mb-8 font-semibold text-lg leading-snug"></p>
-            <div id="nclex-options" class="grid gap-3 mb-8"></div>
-            <p id="nclex-feedback" class="text-center text-xs font-bold uppercase mb-4 h-4"></p>
-            <button id="nclex-submit" onclick="checkFinalStage2()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold text-sm uppercase tracking-widest">Submit Answer</button>
-        </div>
-
-        <div id="congrats-stage" class="bg-white rounded-[32px] p-12 max-w-2xl w-full hidden text-center">
-            <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-            </div>
-            <h2 class="text-3xl font-black mb-4 text-slate-900">Mission Complete!</h2>
-            <p class="text-slate-600 mb-10 text-xl font-semibold leading-relaxed">
-                Congratulations, you completed the DosageSIMPro Maze! You have mastered your clinical dosage calculations.
-            </p>
-            <button onclick="location.reload()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold text-sm uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl">Restart Simulation</button>
-        </div>
     </div>
 
     <script>
@@ -500,7 +507,7 @@
                 nclex: {
                     q: "Which patient is at highest risk for aspiration during oral medication administration?",
                     options: ["A patient receiving continuous tube feed", "A patient who was asleep but aroused easily", "A patient with left-sided weakness following a stroke", "A patient who requires a soft, bland diet order"],
-                    a: 2
+                    a: 3
                 }
             },
             2: { 
@@ -508,23 +515,23 @@
                 nclex: {
                     q: "What three concepts do you review prior to IV medication administration?",
                     options: ["Dilution, Correct Dose, Allergies", "Compatibility, Dilution, Correct Medication", "Correct Medication, Order, and Supply", "Dilution, Compatibility, and Rate of Administration"],
-                    a: 3
+                    a: 4
                 }
             },
             3: { 
-                q: "Order: Ceftriaxone 500 mg IVPB in 100 mL of NS to run over 90 minutes. Set the IV Pump rate?", a: 67, u: "mL",
+                q: "Order: Ceftriaxone 1 gm IVPB in 100 mL of NS to run over 30 minutes. Set the IV Pump rate?", a: 200, u: "mL",
                 nclex: {
                     q: "The nurse is reconstituting a powdered medication. What is the first priority?",
                     options: ["Read the label for the specific type and amount of diluent required", "Check the expiration date of the diluent", "Shake the vial vigorously for 2 minutes", "Draw up the powder into the syringe first"],
-                    a: 0
+                    a: 1
                 }
             },
             4: { 
-                q: "Order: NS 1,000 mL at 125 mL/hr. Set the IV Pump rate.", a: 125, u: "mL/hr",
+                q: "Order: NS 1,000 mL over 8 hours. Set the IV Pump rate.", a: 125, u: "mL/hr",
                 nclex: {
                     q: "The nurse notes that an IV medication is incompatible with the primary IV fluid. What is the best action?",
                     options: ["Administer the medication anyway", "Start a new IV site", "Slow the rate of the primary fluid", "Hold the medication and notify the HCP"],
-                    a: 1
+                    a: 2
                 }
             },
             5: { 
@@ -532,7 +539,7 @@
                 nclex: {
                     q: "The nurse observes puffiness and leaking at the IV site. Which complication is occurring?",
                     options: ["Allergic reaction", "Infection", "Infiltration", "Thrombosis"],
-                    a: 2
+                    a: 3
                 }
             }
         };
@@ -747,7 +754,6 @@
             if(e.key === 'ArrowRight') move(1,0);
         };
 
-        // Standard Finale functions restored from state logic
         function openFinale() {
             state.active = false;
             const data = FINALE_DATA[state.level];
@@ -755,7 +761,6 @@
             state.currentValue = 0;
             document.getElementById('finale-math-q').innerText = data.q;
             document.getElementById('finale-modal').style.display = 'flex';
-            document.getElementById('finale-modal').classList.remove('hidden');
             renderInteractive(data);
         }
 
@@ -790,8 +795,12 @@
         }
 
         function checkFinalStage1() {
-            if(Math.abs(state.currentValue - state.targetValue) <= 0.1) showNclex();
-            else document.getElementById('finale-stage-1').classList.add('shake');
+            if(Math.abs(state.currentValue - state.targetValue) <= 0.1) {
+                showNclex();
+            } else {
+                document.getElementById('finale-stage-1').classList.add('shake');
+                setTimeout(() => document.getElementById('finale-stage-1').classList.remove('shake'), 400);
+            }
         }
 
         function showNclex() {
@@ -812,6 +821,7 @@
             });
             document.getElementById('finale-stage-1').classList.add('hidden');
             document.getElementById('finale-stage-2').classList.remove('hidden');
+            document.getElementById('nclex-feedback').innerText = "";
         }
 
         function checkFinalStage2() {
@@ -822,11 +832,15 @@
                 } else {
                     state.level++;
                     document.getElementById('finale-modal').style.display = 'none';
+                    document.getElementById('finale-stage-2').classList.add('hidden');
+                    document.getElementById('finale-stage-1').classList.remove('hidden');
                     initMaze();
                     state.active = true;
                 }
             } else {
                 document.getElementById('nclex-feedback').innerText = "Incorrect Choice";
+                document.getElementById('finale-stage-2').classList.add('shake');
+                setTimeout(() => document.getElementById('finale-stage-2').classList.remove('shake'), 400);
             }
         }
 
